@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Race Posts</title>
+<meta name="description" content="Turn an athlete photo and a race result into a 1080px Instagram post.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Race Posts">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif&family=Barlow+Condensed:wght@500;600&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@300&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Anton&family=Outfit:wght@200;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE an everyday coaching tool: quick, confident, race-day energy
+   IDEA a quiet photo print with the result set like a caption
+   PICTURE the live 1080px post, minimal: photo plus a few lines of light type, drawn large, photo draggable in place
+   COLOUR white ground, ink, track red for page controls; each post takes its own accent
+   TYPE Inter Tight, light for the time, semibold for the name
+   LAYOUT laptop: post left and sticky, controls right; phone: title, post, save, controls */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#121212);--ink:light-dark(#151515,#f1f0ec);--mut:light-dark(#5c5a55,#a8a6a0);--pan:light-dark(#f5f4f1,#1c1c1a);--line:light-dark(#dcd9d2,#36352f);--red:light-dark(#c8371e,#f06a4e);--onred:#fff}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 "Inter Tight",Arial,sans-serif;overflow-x:clip}
+header{max-width:1240px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top)) max(4vw,16px,env(safe-area-inset-right)) 4px max(4vw,16px,env(safe-area-inset-left))}
+h1{font:500 clamp(32px,4.6vw,46px)/1.05 "Inter Tight",Arial,sans-serif;margin:0;letter-spacing:-.025em}
+header p{margin:6px 0 0;color:var(--mut);max-width:62ch}
+main{max-width:1240px;margin:0 auto;display:grid;gap:28px;padding:16px max(4vw,16px,env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) max(4vw,16px,env(safe-area-inset-left))}
+#cv.drop{outline:4px dashed var(--red);outline-offset:4px}
+@media(min-width:900px){main{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start}.stage{position:sticky;top:16px}}
+.stage{display:grid;gap:14px;justify-items:center}
+#cv{display:block;width:auto;height:auto;max-width:min(100%,560px);max-height:76svh;border-radius:6px;background:#2a2a2a;box-shadow:0 14px 34px rgba(0,0,0,.22);touch-action:none;cursor:grab}
+.acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+button,.file span{font:600 16px "Inter Tight",Arial,sans-serif;min-height:46px;padding:10px 20px;border-radius:999px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+button:hover,.file:hover span{border-color:var(--ink)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.file input:focus-visible+span{outline:3px solid var(--red);outline-offset:2px}
+button.primary{background:var(--red);border-color:var(--red);color:var(--onred)}
+button.primary:hover{filter:brightness(1.08)}
+.hint{margin:0;color:var(--mut);font-size:14px;text-align:center}
+form{display:grid;gap:18px}
+fieldset{border:1px solid var(--line);background:var(--pan);border-radius:10px;padding:16px 18px 18px;margin:0;display:grid;gap:14px}
+legend{font:600 17px "Inter Tight",Arial,sans-serif;padding:0 6px}
+label{display:grid;gap:5px;font-weight:600;font-size:15px}
+label small{font-weight:500;color:var(--mut)}
+input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]),select,textarea{font:400 16px "Inter Tight",Arial,sans-serif;width:100%;min-height:46px;padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+textarea{resize:vertical;min-height:72px}
+.g2{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+.file{display:block}
+.file input{position:absolute;opacity:0;width:1px;height:1px}
+.file span{display:inline-flex;align-items:center}
+.inl{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.chk{display:flex;align-items:center;gap:8px;min-height:44px;font-weight:600}
+.chk input{width:20px;height:20px;accent-color:var(--red)}
+input[type=range]{width:100%;accent-color:var(--red);height:44px}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg label{display:block;text-align:center;cursor:pointer}
+.seg input{position:absolute;opacity:0}
+.seg span{display:block;padding:11px 6px;font-weight:700;font-size:15px;min-height:46px;border-left:1px solid var(--line)}
+.seg label:first-child span{border-left:0}
+.seg input:checked+span{background:var(--ink);color:var(--bg)}
+.seg input:focus-visible+span{outline:3px solid var(--red);outline-offset:-3px}
+.sw{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sw button{width:44px;height:44px;min-height:0;padding:0;border-radius:50%;border:3px solid var(--bg);box-shadow:0 0 0 1.5px var(--line)}
+.sw button[aria-pressed=true]{box-shadow:0 0 0 3px var(--ink)}
+.sw input[type=color]{width:52px;height:44px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);padding:3px;cursor:pointer}
+.lbl{font-weight:600;font-size:15px;margin-bottom:6px}
+.fonts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fonts button{display:grid;gap:4px;justify-items:center;padding:12px 6px 10px;border-radius:10px;font-size:28px;line-height:1.05;min-height:76px;white-space:nowrap;overflow:hidden}
+.fonts button small{font:500 13px "Inter Tight",Arial,sans-serif;color:var(--mut)}
+.fonts button[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.szs{display:grid;gap:2px}
+.sz{display:grid;grid-template-columns:8.5em minmax(0,1fr) 3.4em;align-items:center;gap:10px}
+.sz output{text-align:right;font-variant-numeric:tabular-nums;color:var(--mut);font-weight:600}
+.lrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.lrow img{width:46px;height:46px;object-fit:contain;border-radius:6px;background:#888}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;place-items:center;padding:16px;z-index:5}
+#ov.on{display:grid}
+#ov .box{background:var(--bg);color:var(--ink);border-radius:12px;padding:16px;display:grid;gap:12px;justify-items:center;max-width:min(520px,100%);max-height:100%;overflow:auto}
+#ov img{max-width:100%;max-height:62svh;border-radius:6px}
+#ov p{margin:0;text-align:center;color:var(--mut)}
+@media(prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>Race result post maker</h1>
+<p>Add a photo, the race and the finish time, then save a 1080px image ready for Instagram. Race details and your style are remembered between sessions.</p>
+</header>
+<main>
+<section class="stage" aria-label="Preview">
+<canvas id="cv" width="1080" height="1350" aria-label="Post preview"></canvas>
+<p class="hint">Drag the photo to reposition it. Tap the preview, or drop a file on it, to add a photo.</p>
+<div class="acts"><button type="button" id="save" class="primary">Save image</button><button type="button" id="next">Next athlete</button></div>
+</section>
+
+<form id="f" autocomplete="off" onsubmit="return false">
+<fieldset><legend>Photo</legend>
+<div class="inl"><label class="file"><input type="file" id="photo" accept="image/*"><span>Choose athlete photo</span></label></div>
+<label for="zoom">Zoom<input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></label>
+</fieldset>
+
+<fieldset><legend>Athlete and result</legend>
+<div class="g2">
+<label>Athlete name<input id="name" value="Dana Whitfield"></label>
+<label>Headline<select id="head">
+<option>Personal best</option><option>Debut</option><option>Course best</option><option>Age-group podium</option><option>Boston qualifier</option><option>Negative split</option><option>Finisher</option><option value="custom">Custom…</option>
+</select></label>
+<label id="customWrap" hidden>Custom headline<input id="custom" placeholder="First sub-3"></label>
+<label><span>Finish time <small>type digits, colons fill in</small></span><input id="time" value="1:19:42" placeholder="1:19:42" inputmode="numeric"></label>
+<label><span>Previous best <small>optional</small></span><input id="prev" value="1:21:15" placeholder="1:21:15" inputmode="numeric"></label>
+<label><span>Place <small>optional</small></span><input id="place" placeholder="14th overall, 3rd F30-34"></label>
+</div>
+<label><span>Quote <small>optional</small></span><textarea id="quote" rows="2" placeholder="A line from the athlete"></textarea></label>
+</fieldset>
+
+<fieldset><legend>Race</legend>
+<div class="g2">
+<label>Race name<input id="race" value="Philadelphia Half Marathon"></label>
+<label>Date<input type="date" id="date" value="2026-11-22"></label>
+<label>Distance<select id="dist">
+<option value="5k">5K</option><option value="10k">10K</option><option value="10mi">10 mile</option><option value="half" selected>Half marathon</option><option value="full">Marathon</option><option value="other">Other</option>
+</select></label>
+<label id="kmWrap" hidden>Distance in km<input id="km" inputmode="decimal" placeholder="15"></label>
+</div>
+<div class="inl"><label class="chk"><input type="checkbox" id="pace">Show pace</label>
+<select id="unit" aria-label="Pace unit" style="width:auto"><option value="mi">per mile</option><option value="km">per km</option></select></div>
+</fieldset>
+
+<fieldset><legend>Style</legend>
+<div class="seg" role="radiogroup" aria-label="Layout">
+<label><input type="radio" name="layout" value="overlay" checked><span>Overlay</span></label>
+<label><input type="radio" name="layout" value="print"><span>Print</span></label>
+<label><input type="radio" name="layout" value="split"><span>Split</span></label>
+</div>
+<div class="seg" role="radiogroup" aria-label="Size">
+<label><input type="radio" name="size" value="post" checked><span>Post 4:5</span></label>
+<label><input type="radio" name="size" value="square"><span>Square</span></label>
+<label><input type="radio" name="size" value="story"><span>Story 9:16</span></label>
+</div>
+<div><div class="lbl">Font</div><div class="fonts" id="fonts" role="radiogroup" aria-label="Font"></div></div>
+<div><div class="lbl">Accent colour</div>
+<div class="sw" id="sw"></div></div>
+<div class="lrow"><label class="file"><input type="file" id="logoIn" accept="image/*"><span>Add team logo</span></label><img id="logoPrev" alt="Logo preview" hidden><button type="button" id="logoX" hidden>Remove logo</button></div>
+<label>Your handle<input id="handle" value="@miles.with.jon"></label>
+</fieldset>
+<fieldset><legend>Sizes</legend>
+<div class="szs" id="sizes"></div>
+<div><button type="button" id="szReset">Reset sizes</button></div>
+</fieldset>
+</form>
+</main>
+<div id="ov" role="dialog" aria-modal="true" aria-label="Save image"><div class="box"><img id="ovImg" alt="Finished post"><p>Press and hold the image to save it to Photos, or right-click and choose Save image.</p><button type="button" id="ovX">Done</button></div></div>
+<div id="toast" role="status"></div>
+<script>
+{
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d');
+let T='"Inter Tight",Inter,Arial,sans-serif';
+const q=f=>`"${f}",Arial,sans-serif`;
+const FONTS={
+  clean:{label:'Clean',t:q('Inter Tight'),tw:300,dots:1,n:q('Inter Tight'),nw:600,x:q('Inter Tight')},
+  serif:{label:'Serif',t:'"Instrument Serif",Georgia,serif',tw:400,n:'"Instrument Serif",Georgia,serif',nw:400,ns:1.3,x:q('Inter Tight')},
+  condensed:{label:'Condensed',t:q('Barlow Condensed'),tw:500,n:q('Barlow Condensed'),nw:600,ns:1.15,x:q('Barlow')},
+  mono:{label:'Stopwatch',t:'"DM Mono",ui-monospace,monospace',tw:300,n:q('DM Sans'),nw:600,x:q('DM Sans')},
+  bold:{label:'Bold',t:q('Anton'),tw:400,n:q('Inter Tight'),nw:700,x:q('Inter Tight')},
+  round:{label:'Geometric',t:q('Outfit'),tw:200,dots:1,n:q('Outfit'),nw:600,x:q('Outfit')}};
+let P=FONTS.clean;
+const ZK=[['time','Time'],['prog','Old → new time'],['name','Name'],['race','Race and date'],['stats','Stats line'],['head','Headline'],['quote','Quote'],['handle','Handle'],['logo','Logo']];
+const Z=Object.fromEntries(ZK.map(([k])=>[k,1]));
+const SIZES={post:[1080,1350],square:[1080,1080],story:[1080,1920]};
+const MI={'5k':3.10686,'10k':6.21371,'10mi':10,'half':13.1094,'full':26.2188};
+const DN={'5k':'5K','10k':'10K','10mi':'10 Mile','half':'Half Marathon','full':'Marathon'};
+const SW=['#4cc3ea','#e2482d','#d7f23b','#2457ff','#ff8a1f','#16a36b'];
+const st={layout:'overlay',size:'post',accent:SW[0]};
+let W=1080,H=1350,img=null,logo=null,px=0,py=0,raf=0;
+const store={get(k){try{return localStorage.getItem('rrp-'+k)}catch(e){return null}},set(k,v){try{v==null?localStorage.removeItem('rrp-'+k):localStorage.setItem('rrp-'+k,v)}catch(e){}}};
+
+const parseT=s=>{const p=String(s).trim().split(':').map(Number);if(p.length<2||p.some(n=>isNaN(n)))return null;return p.reduce((a,n)=>a*60+n,0)};
+const pad2=n=>String(n).padStart(2,'0');
+const fmtT=t=>{t=Math.round(t);const h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return h?`${h}:${pad2(m)}:${pad2(s)}`:`${m}:${pad2(s)}`};
+const rgb=h=>{h=h.replace('#','');if(h.length===3)h=[...h].map(c=>c+c).join('');const n=parseInt(h,16);return[n>>16&255,n>>8&255,n&255]};
+const lum=h=>{const c=rgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:((v+.055)/1.055)**2.4});return .2126*c[0]+.7152*c[1]+.0722*c[2]};
+const mix=(h,k,a)=>{const x=rgb(h),y=rgb(k);return`rgb(${x.map((v,i)=>Math.round(v+(y[i]-v)*a)).join(',')})`};
+const onA=h=>lum(h)>.2?'#111111':'#ffffff';
+const deep=h=>lum(h)>.25?mix(h,'#000000',lum(h)>.55?.55:.38):h;
+const lite=h=>lum(h)<.18?mix(h,'#ffffff',.45):h;
+
+function data(){
+  const t=parseT($('time').value),p=parseT($('prev').value);
+  const g=t&&p&&p>t?p-t:0;
+  let head=$('head').value;if(head==='custom')head=$('custom').value.trim();
+  const dk=$('dist').value;const mi=dk==='other'?(parseFloat($('km').value)||0)/1.609344:MI[dk];
+  let pace='';
+  if($('pace').checked&&t&&mi){const km=$('unit').value==='km';pace=fmtT(km?t/(mi*1.609344):t/mi)+(km?' /km':' /mi')}
+  let date='';const dv=$('date').value;
+  if(dv){const [y,m,d]=dv.split('-').map(Number);date=new Date(y,m-1,d).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}
+  const dist=dk==='other'?($('km').value?$('km').value+'K':''):DN[dk];
+  return{name:$('name').value.trim()||'Athlete name',race:$('race').value.trim()||'Race name',meta:[dist,date].filter(Boolean).join('  /  '),
+    time:$('time').value.trim()||'0:00',prev:g?fmtT(p):'',gain:g?(g<60?g+' sec faster':fmtT(g)+' faster'):'',gainS:g?(g<60?g+'s':fmtT(g)):'',
+    head,place:$('place').value.trim(),quote:$('quote').value.trim(),pace,handle:$('handle').value.trim()};
+}
+
+const F=(w,s,f)=>{ctx.font=`${w} ${s}px ${f||T}`};
+function fit(t,maxW,max,min,w,f){let s=max;F(w,s,f);while(s>min&&ctx.measureText(t).width>maxW){s-=2;F(w,s,f)}return s}
+function nm(t,maxW,max,min){const k=P.ns||1;return fit(t,maxW,Math.round(max*k),Math.round(min*k),P.nw,P.n)}
+function wrap(t,maxW,max){const L=[];let cur='';for(const w of t.split(/\s+/)){const x=cur?cur+' '+w:w;if(cur&&ctx.measureText(x).width>maxW){L.push(cur);cur=w}else cur=x}if(cur)L.push(cur);if(L.length>max){L.length=max;let l=L[max-1];while(l&&ctx.measureText(l+'…').width>maxW)l=l.slice(0,-1);L[max-1]=l.trimEnd()+'…'}return L}
+function shade(y0,y1,a0,a1){const g=ctx.createLinearGradient(0,y0,0,y1);g.addColorStop(0,`rgba(0,0,0,${a0})`);g.addColorStop(1,`rgba(0,0,0,${a1})`);ctx.fillStyle=g;ctx.fillRect(0,y0,W,y1-y0)}
+function photo(x,y,w,h){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+  if(img){const s=Math.max(w/img.width,h/img.height)*+$('zoom').value,dw=img.width*s,dh=img.height*s,mx=(dw-w)/2,my=(dh-h)/2;
+    px=Math.max(-mx,Math.min(mx,px));py=Math.max(-my,Math.min(my,py));ctx.drawImage(img,x+(w-dw)/2+px,y+(h-dh)/2+py,dw,dh)}
+  else{const g=ctx.createLinearGradient(x,y,x,y+h);g.addColorStop(0,'#a9a59d');g.addColorStop(1,'#6f6b64');ctx.fillStyle=g;ctx.fillRect(x,y,w,h);
+    F(500,30);ctx.fillStyle='rgba(255,255,255,.85)';ctx.textAlign='center';ctx.fillText('Add a photo of your athlete',x+w/2,y+h*.38);ctx.textAlign='left'}
+  ctx.restore()}
+function drawLogo(x,y,s,right){if(!logo)return;const k=Math.min(s/logo.width,s/logo.height),w=logo.width*k,h=logo.height*k;ctx.drawImage(logo,right?x-w:x,y,w,h)}
+const stats=d=>[d.place&&{t:d.place},d.pace&&{t:d.pace}].filter(Boolean);
+// old time struck through -> new time, then the gain
+function progW(d,s){F(500,s);const a=ctx.measureText(d.prev).width;F(600,s);return a+s*2.1+ctx.measureText(d.time).width+s*1.1+ctx.measureText(d.gain).width}
+function prog(d,x,y,s,col,mut,acc,maxW){while(s>12&&progW(d,s)>maxW)s-=1;const g=s*.5,al=s*1.1,mid=y-s*.35,lw=Math.max(2,s*.075);
+  F(500,s);ctx.fillStyle=mut;ctx.fillText(d.prev,x,y);const a=ctx.measureText(d.prev).width;ctx.fillRect(x-3,mid-lw/2,a+6,lw);
+  let cx=x+a+g;ctx.save();ctx.strokeStyle=mut;ctx.lineWidth=lw;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(cx,mid);ctx.lineTo(cx+al,mid);ctx.moveTo(cx+al-s*.3,mid-s*.27);ctx.lineTo(cx+al,mid);ctx.lineTo(cx+al-s*.3,mid+s*.27);ctx.stroke();ctx.restore();
+  cx+=al+g;F(600,s);ctx.fillStyle=col;ctx.fillText(d.time,cx,y);cx+=ctx.measureText(d.time).width+s*1.1;ctx.fillStyle=acc;ctx.fillText(d.gain,cx,y)}
+function row(arr,x,y,size,col,acc,maxW){const tot=s=>{F(500,s);return arr.reduce((a,it)=>a+ctx.measureText(it.t).width,0)+s*1.2*(arr.length-1)};while(maxW&&size>12&&tot(size)>maxW)size-=1;F(500,size);const gap=size*1.2;let cx=x;for(const it of arr){ctx.fillStyle=it.a?acc:col;ctx.fillText(it.t,cx,y);cx+=ctx.measureText(it.t).width+gap}}
+const CW=.3;
+function asc(s){F(P.tw,s,P.t);return ctx.measureText('0').actualBoundingBoxAscent||s*.73}
+function timeW(t,s){F(P.tw,s,P.t);if(!P.dots)return ctx.measureText(t).width;let w=0;for(const ch of t)w+=ch===':'?s*CW:ctx.measureText(ch).width;return w}
+function fitTime(t,maxW,max,min){let s=max;while(s>min&&timeW(t,s)>maxW)s-=2;return s}
+function drawTime(t,x,y,s){const a=asc(s);F(P.tw,s,P.t);if(!P.dots){ctx.fillText(t,x,y);return}let cx=x;const r=s*.045;for(const ch of t){if(ch===':'){const c=cx+s*CW/2;for(const dy of [r+s*.01,a*.71]){ctx.beginPath();ctx.arc(c,y-dy,r,0,7);ctx.fill()}cx+=s*CW}else{ctx.fillText(ch,cx,y);cx+=ctx.measureText(ch).width}}}
+const story=()=>st.size==='story';
+
+function overlay(d){
+  const pd=72,sm=story()?250:76,top=story()?200:64,acc=lite(st.accent),sts=stats(d),rl=[d.race,d.meta].filter(Boolean).join('  /  ');
+  const hs=26*Z.head,hds=24*Z.handle,ss=26*Z.stats,qs=30*Z.quote;
+  photo(0,0,W,H);shade(H*.38,H,0,.78);if(logo||d.handle)shade(0,H*.22,.3,0);
+  drawLogo(pd,top,90*Z.logo,false);
+  if(d.handle){F(500,hds);ctx.fillStyle='rgba(255,255,255,.85)';ctx.textAlign='right';ctx.fillText(d.handle,W-pd,top+hds*1.2);ctx.textAlign='left'}
+  ctx.save();ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=12;
+  let y=H-sm;const rs=fit(rl,W-pd*2,28*Z.race,14,500);
+  if(sts.length){row(sts,pd,y,ss,'rgba(255,255,255,.8)',acc,W-pd*2);y-=ss*.75+24+rs*.25}
+  F(500,rs);ctx.fillStyle='rgba(255,255,255,.78)';ctx.fillText(rl,pd,y);
+  const ns=nm(d.name,W-pd*2,44*Z.name,18);y-=rs*.75+22+ns*.25;ctx.fillStyle='#fff';ctx.fillText(d.name,pd,y);
+  const ps=30*Z.prog;if(d.prev){y-=ns*.75+22+ps*.25;prog(d,pd,y,ps,'#fff','rgba(255,255,255,.62)',acc,W-pd*2);y-=ps*.75+24}else y-=ns*.75+26;
+  const ts=fitTime(d.time,W-pd*2,220*Z.time,50);ctx.fillStyle='#fff';drawTime(d.time,pd,y,ts);y-=asc(ts)+40;
+  if(d.head){y-=hs*.25;F(600,hs);ctx.fillStyle=acc;ctx.fillText(d.head,pd,y);y-=hs*.75+26}
+  if(d.quote){F('italic 400',qs);const Q=wrap(d.quote,W-pd*2-120,3);y-=qs*.25;ctx.fillStyle='rgba(255,255,255,.9)';Q.forEach((l,i)=>ctx.fillText(l,pd,y-(Q.length-1-i)*qs*1.4))}
+  ctx.restore();
+}
+
+function print(d){
+  const m=story()?64:52,mt=story()?200:m,sb=story()?200:0,ink='#161616',grey='#77736b',acc=deep(st.accent),sts=stats(d),rl=[d.race,d.meta].filter(Boolean).join('  /  ');
+  const iw=W-m*2,hs=22*Z.head,hds=22*Z.handle,ss=24*Z.stats,qs=26*Z.quote;
+  ctx.fillStyle='#f7f6f2';ctx.fillRect(0,0,W,H);
+  const ts=fitTime(d.time,iw*.6,150*Z.time,40),tw=timeW(d.time,ts),a=asc(ts);
+  const ns=nm(d.name,Math.max(120,iw-tw-40),44*Z.name,16),rs=fit(rl,iw,26*Z.race,14,500);
+  F('italic 400',qs);const Q=d.quote?wrap(d.quote,iw,2):[];
+  let o=40+Math.max(a,ns*.75+(d.head?18+hs:0));const yT=o,ps=26*Z.prog;let yP=0;
+  if(d.prev){o+=ns*.25+18+ps*.75;yP=o;o+=ps*.25+14+rs*.75}else o+=ns*.25+16+rs*.75;const yR=o;let last=rs,yS=0;
+  if(sts.length){o+=rs*.25+16+ss*.75;yS=o;last=ss}
+  const yQ=[];Q.forEach((_,i)=>{o+=i?qs*1.45:last*.25+14+qs*.75;yQ.push(o)});if(Q.length)last=qs;
+  const th=o+last*.25+(d.handle?hds+52:36),pb=H-sb-th;
+  photo(m,mt,iw,pb-mt);
+  ctx.fillStyle=ink;drawTime(d.time,W-m-tw,pb+yT,ts);
+  if(d.head){F(600,hs);ctx.fillStyle=acc;ctx.fillText(d.head,m,pb+yT-ns*.75-18)}
+  nm(d.name,Math.max(120,iw-tw-40),44*Z.name,16);ctx.fillStyle=ink;ctx.fillText(d.name,m,pb+yT);
+  if(yP)prog(d,m,pb+yP,ps,ink,grey,acc,iw);
+  F(500,rs);ctx.fillStyle=grey;ctx.fillText(rl,m,pb+yR);
+  if(yS)row(sts,m,pb+yS,ss,grey,acc,iw);
+  if(Q.length){F('italic 400',qs);ctx.fillStyle=grey;Q.forEach((l,i)=>ctx.fillText(l,m,pb+yQ[i]))}
+  if(d.handle){F(500,hds);ctx.fillStyle=grey;ctx.textAlign='right';ctx.fillText(d.handle,W-m,H-sb-28);ctx.textAlign='left'}
+  drawLogo(W-m-28,mt+28,84*Z.logo,true);
+}
+
+function split(d){
+  const pd=72,sb=story()?220:0,acc=lite(st.accent),sts=stats(d),rl=[d.race,d.meta].filter(Boolean).join('  /  ');
+  const hs=24*Z.head,hds=22*Z.handle,ss=24*Z.stats,qs=28*Z.quote;
+  const ts=fitTime(d.time,W-pd*2,220*Z.time,50),a=asc(ts);
+  const ns=nm(d.name,W-pd*2,42*Z.name,18),rs=fit(rl,W-pd*2,26*Z.race,14,500);
+  F('italic 400',qs);const Q=d.quote?wrap(d.quote,W-pd*2,2):[];
+  const t0=Math.max(d.head?hs:0,d.handle?hds:0);
+  const yH=64+t0*.75,yT=yH+t0*.25+28+a,ps=28*Z.prog,yP=d.prev?yT+24+ps*.75:0,yN=(yP?yP+ps*.25+24:yT+30)+ns*.75,yR=yN+ns*.25+rs*.75+14;
+  let o=yR,last=rs,yS=0;if(sts.length){o+=rs*.25+ss*.75+18;yS=o;last=ss}
+  const yQ=[];Q.forEach((_,i)=>{o+=i?qs*1.43:last*.25+qs*.75+22;yQ.push(o)});if(Q.length)last=qs;
+  const ph=o+last*.25+56+sb,top=H-ph;
+  photo(0,0,W,top+1);drawLogo(W-pd,story()?200:pd-16,90*Z.logo,true);
+  ctx.fillStyle='#121212';ctx.fillRect(0,top,W,ph);
+  if(d.head){F(600,hs);ctx.fillStyle=acc;ctx.fillText(d.head,pd,top+yH)}
+  if(d.handle){F(500,hds);ctx.fillStyle='rgba(255,255,255,.55)';ctx.textAlign='right';ctx.fillText(d.handle,W-pd,top+yH);ctx.textAlign='left'}
+  ctx.fillStyle='#fff';drawTime(d.time,pd,top+yT,ts);
+  if(yP)prog(d,pd,top+yP,ps,'#fff','rgba(255,255,255,.5)',acc,W-pd*2);
+  nm(d.name,W-pd*2,42*Z.name,18);ctx.fillStyle='#fff';ctx.fillText(d.name,pd,top+yN);
+  F(500,rs);ctx.fillStyle='rgba(255,255,255,.6)';ctx.fillText(rl,pd,top+yR);
+  if(yS)row(sts,pd,top+yS,ss,'rgba(255,255,255,.75)',acc,W-pd*2);
+  if(Q.length){F('italic 400',qs);ctx.fillStyle='rgba(255,255,255,.8)';Q.forEach((l,i)=>ctx.fillText(l,pd,top+yQ[i]))}
+}
+
+const L={overlay,print,split};
+function draw(){raf=0;const [w,h]=SIZES[st.size];if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}W=w;H=h;
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);ctx.textAlign='left';ctx.textBaseline='alphabetic';L[st.layout](data())}
+const req=()=>{if(!raf)raf=requestAnimationFrame(draw)};
+
+let tt=0;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200)}
+function readImg(file,cb){if(!file)return;const u=URL.createObjectURL(file),im=new Image();im.onload=()=>cb(im);im.onerror=()=>toast('That file could not be opened as an image');im.src=u}
+function setLogo(src,save){const im=new Image();im.onload=()=>{let u=src;if(save){const c=document.createElement('canvas'),k=Math.min(1,320/Math.max(im.width,im.height));c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);u=c.toDataURL('image/png');store.set('logo',u)}
+  const l=new Image();l.onload=()=>{logo=l;$('logoPrev').src=u;$('logoPrev').hidden=false;$('logoX').hidden=false;req()};l.src=u};im.src=src}
+
+// swatches
+const sw=$('sw');
+function paintSw(){sw.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===st.accent));$('acc').value=st.accent}
+sw.innerHTML=SW.map(c=>`<button type="button" data-c="${c}" style="background:${c}" aria-label="Accent ${c}"></button>`).join('')+'<input type="color" id="acc" aria-label="Custom accent colour">';
+sw.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.accent=b.dataset.c;store.set('accent',st.accent);paintSw();req()});
+$('acc').addEventListener('input',e=>{st.accent=e.target.value;store.set('accent',st.accent);paintSw();req()});
+
+// restore remembered style
+for(const k of ['layout','size']){const v=store.get(k);if(v&&(k==='layout'?L[v]:SIZES[v])){st[k]=v;const r=document.querySelector(`input[name=${k}][value=${v}]`);if(r)r.checked=true}}
+{const a=store.get('accent');if(a&&/^#[0-9a-f]{6}$/i.test(a))st.accent=a;const h=store.get('handle');if(h!==null)$('handle').value=h;const lg=store.get('logo');if(lg)setLogo(lg,false)}
+paintSw();
+const KEEP=['race','date','dist','km','unit','head','custom'];
+for(const id of KEEP){const v=store.get('f-'+id);if(v!==null)$(id).value=v}
+{const v=store.get('f-pace');if(v!==null)$('pace').checked=v==='1'}
+$('customWrap').hidden=$('head').value!=='custom';$('kmWrap').hidden=$('dist').value!=='other';
+
+$('f').addEventListener('input',e=>{const t=e.target;
+  if(t.name==='layout'||t.name==='size'){st[t.name]=t.value;store.set(t.name,t.value)}
+  if(t.id==='handle')store.set('handle',t.value);
+  if(KEEP.includes(t.id))store.set('f-'+t.id,t.value);
+  if(t.id==='pace')store.set('f-pace',t.checked?'1':'0');
+  $('customWrap').hidden=$('head').value!=='custom';$('kmWrap').hidden=$('dist').value!=='other';req()});
+$('f').addEventListener('change',()=>req());
+// number pads have no colon key: rebuild h:mm:ss from the digits typed
+const fmtDigits=g=>{g=g.replace(/^0+(?=\d{3})/,'');if(g.length<=2)return g;const s=g.slice(-2),m=g.slice(-4,-2),h=g.slice(0,-4);return h?`${+h}:${m}:${s}`:`${+m}:${s}`};
+for(const id of ['time','prev']){const el=$(id);el.dataset.d=el.value.replace(/\D/g,'');
+  el.addEventListener('input',e=>{let g=el.value.replace(/\D/g,'').slice(0,6);
+    if(e.inputType&&e.inputType.startsWith('delete')&&g===el.dataset.d)g=g.slice(0,-1);
+    el.dataset.d=g;el.value=fmtDigits(g);req()},true)}
+$('photo').addEventListener('change',e=>readImg(e.target.files[0],im=>{img=im;px=py=0;$('zoom').value=1;req()}));
+$('logoIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>setLogo(r.result,true);r.readAsDataURL(f)});
+$('logoX').addEventListener('click',()=>{logo=null;store.set('logo',null);$('logoPrev').hidden=true;$('logoX').hidden=true;$('logoIn').value='';req()});
+$('next').addEventListener('click',()=>{for(const id of ['name','time','prev','place','quote'])$(id).value='';img=null;px=py=0;$('zoom').value=1;$('photo').value='';req();$('name').focus();toast('Race details kept for the next athlete')});
+
+// drag to reposition
+let drag=null;
+cv.addEventListener('pointerdown',e=>{if(!img)return;drag={x:e.clientX,y:e.clientY,px,py};cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'});
+cv.addEventListener('pointermove',e=>{if(!drag)return;const k=cv.width/cv.clientWidth;px=drag.px+(e.clientX-drag.x)*k;py=drag.py+(e.clientY-drag.y)*k;req()});
+const end=()=>{drag=null;cv.style.cursor=''};cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+cv.addEventListener('click',()=>{if(!img)$('photo').click()});
+
+// save
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const touch=matchMedia('(pointer:coarse)').matches;
+$('save').textContent=touch&&navigator.canShare?'Save or share':'Save image';
+$('save').addEventListener('click',async()=>{draw();const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.93));if(!blob){toast('Could not create the image');return}
+  const d=data(),fn=`${slug(d.name)||'athlete'}-${slug(d.race)||'race'}.jpg`,file=new File([blob],fn,{type:'image/jpeg'});
+  // phone: the share sheet offers Save Image and Instagram directly
+  if(touch&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]});return}catch(e){if(e&&e.name==='AbortError')return}}
+  // desktop: plain download
+  if(!touch){const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=fn;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Image downloaded');return}
+  $('ovImg').src=URL.createObjectURL(blob);$('ov').classList.add('on');$('ovX').focus()});
+$('ovX').addEventListener('click',()=>$('ov').classList.remove('on'));
+$('ov').addEventListener('click',e=>{if(e.target.id==='ov')$('ov').classList.remove('on')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('ov').classList.remove('on')});
+// drop a photo on the preview (desktop)
+for(const ev of ['dragenter','dragover'])cv.addEventListener(ev,e=>{e.preventDefault();cv.classList.add('drop')});
+for(const ev of ['dragleave','drop'])cv.addEventListener(ev,()=>cv.classList.remove('drop'));
+cv.addEventListener('drop',e=>{e.preventDefault();const f=[...(e.dataTransfer.files||[])].find(f=>f.type.startsWith('image/'));readImg(f,im=>{img=im;px=py=0;$('zoom').value=1;req()})});
+
+// font picker
+const loadF=p=>document.fonts?Promise.all([`${p.tw} 100px ${p.t}`,`${p.nw} 40px ${p.n}`,`400 30px ${p.x}`,`500 30px ${p.x}`,`600 30px ${p.x}`,`italic 400 30px ${p.x}`].map(f=>document.fonts.load(f).catch(()=>{}))):Promise.resolve();
+const fb=$('fonts');
+for(const [id,f] of Object.entries(FONTS)){const b=document.createElement('button');b.type='button';b.dataset.f=id;b.setAttribute('role','radio');
+  const sp=document.createElement('span');sp.className='ft';sp.style.fontFamily=f.t;sp.style.fontWeight=f.tw;sp.textContent='1:19:42';
+  const sm=document.createElement('small');sm.textContent=f.label;b.append(sp,sm);fb.append(b)}
+const paintF=()=>fb.querySelectorAll('button').forEach(b=>{const on=FONTS[b.dataset.f]===P;b.setAttribute('aria-pressed',on);b.setAttribute('aria-checked',on)});
+const setFont=id=>{if(!FONTS[id])return;P=FONTS[id];T=P.x;paintF();req();loadF(P).then(draw)};
+fb.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;store.set('font',b.dataset.f);setFont(b.dataset.f)});
+const syncSample=()=>{const t=$('time').value.trim()||'1:19:42';fb.querySelectorAll('.ft').forEach(x=>x.textContent=t)};
+$('time').addEventListener('input',syncSample);
+setFont(store.get('font')||'clean');syncSample();
+// element sizes
+const szb=$('sizes');
+try{const z=JSON.parse(store.get('sizes')||'{}');for(const k in Z)if(z[k]>=.6&&z[k]<=1.6)Z[k]=z[k]}catch(e){}
+for(const [k,l] of ZK){const r=document.createElement('div');r.className='sz';
+  const lb=document.createElement('label');lb.htmlFor='z-'+k;lb.textContent=l;
+  const i=document.createElement('input');i.type='range';i.id='z-'+k;i.min=60;i.max=160;i.step=5;i.value=Math.round(Z[k]*100);i.dataset.k=k;
+  const o=document.createElement('output');o.id='o-'+k;o.textContent=i.value+'%';r.append(lb,i,o);szb.append(r)}
+szb.addEventListener('input',e=>{const i=e.target;if(!i.dataset.k)return;Z[i.dataset.k]=i.value/100;$('o-'+i.dataset.k).textContent=i.value+'%';store.set('sizes',JSON.stringify(Z));req()});
+$('szReset').addEventListener('click',()=>{for(const [k] of ZK){Z[k]=1;$('z-'+k).value=100;$('o-'+k).textContent='100%'}store.set('sizes',null);req()});
+draw();
+if(document.fonts)document.fonts.ready.then(draw);
+}
+</script>
+<script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script>
+</body>
+</html>
