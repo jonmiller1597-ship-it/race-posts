@@ -35,7 +35,14 @@ h1{font:500 clamp(32px,4.6vw,46px)/1.05 "Inter Tight",Arial,sans-serif;margin:0;
 header p{margin:6px 0 0;color:var(--mut);max-width:62ch}
 main{max-width:1240px;margin:0 auto;display:grid;gap:28px;padding:16px max(4vw,16px,env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) max(4vw,16px,env(safe-area-inset-left))}
 #cv.drop{outline:4px dashed var(--red);outline-offset:4px}
-@media(min-width:900px){main{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start}.stage{position:sticky;top:16px}}
+main{grid-template-areas:"stage" "tabs" "panel"}
+.stage{grid-area:stage}.tabs{grid-area:tabs}form{grid-area:panel}
+@media(min-width:900px){main{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:auto 1fr;grid-template-areas:"stage tabs" "stage panel";align-items:start;row-gap:16px}.stage{position:sticky;top:16px}}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:1 0 auto;min-height:42px;padding:8px 14px;font-size:15px}
+.tabs button[aria-selected=true]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+fieldset legend{display:none}
 .stage{display:grid;gap:14px;justify-items:center}
 #cv{display:block;width:auto;height:auto;max-width:min(100%,560px);max-height:76svh;border-radius:6px;background:#2a2a2a;box-shadow:0 14px 34px rgba(0,0,0,.22);touch-action:none;cursor:grab}
 .acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
@@ -46,7 +53,7 @@ button.primary{background:var(--red);border-color:var(--red);color:var(--onred)}
 button.primary:hover{filter:brightness(1.08)}
 .hint{margin:0;color:var(--mut);font-size:14px;text-align:center}
 form{display:grid;gap:18px}
-fieldset{border:1px solid var(--line);background:var(--pan);border-radius:10px;padding:16px 18px 18px;margin:0;display:grid;gap:14px}
+fieldset{border:1px solid var(--line);background:var(--pan);border-radius:10px;padding:18px;margin:0;display:grid;gap:14px}
 legend{font:600 17px "Inter Tight",Arial,sans-serif;padding:0 6px}
 label{display:grid;gap:5px;font-weight:600;font-size:15px}
 label small{font-weight:500;color:var(--mut)}
@@ -88,6 +95,17 @@ input[type=range]{width:100%;accent-color:var(--red);height:44px}
 #ov .box{background:var(--bg);color:var(--ink);border-radius:12px;padding:16px;display:grid;gap:12px;justify-items:center;max-width:min(520px,100%);max-height:100%;overflow:auto}
 #ov img{max-width:100%;max-height:62svh;border-radius:6px}
 #ov p{margin:0;text-align:center;color:var(--mut)}
+@media(max-width:899px){
+html,body{height:100%;overflow:hidden}
+header{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+main{position:fixed;left:0;right:0;top:0;height:var(--vvh,100dvh);transform:translateY(var(--vvt,0px));grid-template-rows:auto auto minmax(0,1fr);gap:10px;padding:calc(10px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
+.stage{gap:8px}
+#cv{max-height:calc(var(--vvh,100dvh) * .5 - 56px);box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.hint{display:none}
+.tabs{gap:4px}.tabs button{flex:1 1 0;padding:7px 2px;font-size:14px;min-height:40px}
+.acts button{min-height:40px;padding:7px 18px;font-size:15px}
+form{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+}
 @media(prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
 </head>
@@ -102,14 +120,15 @@ input[type=range]{width:100%;accent-color:var(--red);height:44px}
 <p class="hint">Drag the photo to reposition it. Tap the preview, or drop a file on it, to add a photo.</p>
 <div class="acts"><button type="button" id="save" class="primary">Save image</button><button type="button" id="next">Next athlete</button></div>
 </section>
+<nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
 
 <form id="f" autocomplete="off" onsubmit="return false">
-<fieldset><legend>Photo</legend>
+<fieldset data-tab="Photo"><legend>Photo</legend>
 <div class="inl"><label class="file"><input type="file" id="photo" accept="image/*"><span>Choose athlete photo</span></label></div>
 <label for="zoom">Zoom<input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></label>
 </fieldset>
 
-<fieldset><legend>Athlete and result</legend>
+<fieldset data-tab="Athlete"><legend>Athlete and result</legend>
 <div class="g2">
 <label>Athlete name<input id="name" value="Dana Whitfield"></label>
 <label>Headline<select id="head">
@@ -123,7 +142,7 @@ input[type=range]{width:100%;accent-color:var(--red);height:44px}
 <label><span>Quote <small>optional</small></span><textarea id="quote" rows="2" placeholder="A line from the athlete"></textarea></label>
 </fieldset>
 
-<fieldset><legend>Race</legend>
+<fieldset data-tab="Race"><legend>Race</legend>
 <div class="g2">
 <label>Race name<input id="race" value="Philadelphia Half Marathon"></label>
 <label>Date<input type="date" id="date" value="2026-11-22"></label>
@@ -136,7 +155,7 @@ input[type=range]{width:100%;accent-color:var(--red);height:44px}
 <select id="unit" aria-label="Pace unit" style="width:auto"><option value="mi">per mile</option><option value="km">per km</option></select></div>
 </fieldset>
 
-<fieldset><legend>Style</legend>
+<fieldset data-tab="Style"><legend>Style</legend>
 <div class="seg" role="radiogroup" aria-label="Layout">
 <label><input type="radio" name="layout" value="overlay" checked><span>Overlay</span></label>
 <label><input type="radio" name="layout" value="print"><span>Print</span></label>
@@ -153,7 +172,7 @@ input[type=range]{width:100%;accent-color:var(--red);height:44px}
 <div class="lrow"><label class="file"><input type="file" id="logoIn" accept="image/*"><span>Add team logo</span></label><img id="logoPrev" alt="Logo preview" hidden><button type="button" id="logoX" hidden>Remove logo</button></div>
 <label>Your handle<input id="handle" value="@miles.with.jon"></label>
 </fieldset>
-<fieldset><legend>Sizes</legend>
+<fieldset data-tab="Sizes"><legend>Sizes</legend>
 <div class="szs" id="sizes"></div>
 <div><button type="button" id="szReset">Reset sizes</button></div>
 </fieldset>
@@ -344,7 +363,7 @@ for(const id of ['time','prev']){const el=$(id);el.dataset.d=el.value.replace(/\
 $('photo').addEventListener('change',e=>readImg(e.target.files[0],im=>{img=im;px=py=0;$('zoom').value=1;req()}));
 $('logoIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>setLogo(r.result,true);r.readAsDataURL(f)});
 $('logoX').addEventListener('click',()=>{logo=null;store.set('logo',null);$('logoPrev').hidden=true;$('logoX').hidden=true;$('logoIn').value='';req()});
-$('next').addEventListener('click',()=>{for(const id of ['name','time','prev','place','quote'])$(id).value='';img=null;px=py=0;$('zoom').value=1;$('photo').value='';req();$('name').focus();toast('Race details kept for the next athlete')});
+$('next').addEventListener('click',()=>{for(const id of ['name','time','prev','place','quote'])$(id).value='';img=null;px=py=0;$('zoom').value=1;$('photo').value='';req();showTab('Athlete');$('name').focus();toast('Race details kept for the next athlete')});
 
 // drag to reposition
 let drag=null;
@@ -355,6 +374,26 @@ cv.addEventListener('click',()=>{if(!img)$('photo').click()});
 
 // save
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+// sections as tabs: the preview stays put and only one section shows at a time
+const tabs=$('tabs'),panels=[...document.querySelectorAll('fieldset[data-tab]')];
+panels.forEach((f,i)=>{const n=f.dataset.tab,b=document.createElement('button');b.type='button';b.id='tab-'+i;b.textContent=n;b.dataset.t=n;b.setAttribute('role','tab');b.setAttribute('aria-controls','panel-'+i);
+  f.id='panel-'+i;f.setAttribute('role','tabpanel');f.setAttribute('aria-labelledby',b.id);tabs.append(b)});
+const tabBtns=[...tabs.children];
+function showTab(n){if(!panels.some(f=>f.dataset.tab===n))n=panels[0].dataset.tab;
+  panels.forEach(f=>f.hidden=f.dataset.tab!==n);
+  tabBtns.forEach(b=>{const on=b.dataset.t===n;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;if(on)b.scrollIntoView({block:'nearest',inline:'nearest'})});
+  $('f').scrollTop=0;store.set('tab',n)}
+tabs.addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.t)});
+tabs.addEventListener('keydown',e=>{const i=tabBtns.indexOf(document.activeElement);if(i<0)return;let j=null;
+  if(e.key==='ArrowRight')j=(i+1)%tabBtns.length;else if(e.key==='ArrowLeft')j=(i-1+tabBtns.length)%tabBtns.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=tabBtns.length-1;
+  if(j===null)return;e.preventDefault();showTab(tabBtns[j].dataset.t);tabBtns[j].focus()});
+showTab(store.get('tab')||'Photo');
+// phone: size the app to the visible area so the keyboard shrinks the preview instead of pushing it off screen
+const vv=window.visualViewport,narrow=matchMedia('(max-width:899px)');
+function fitVV(){const r=document.documentElement.style;if(vv&&narrow.matches){r.setProperty('--vvh',vv.height+'px');r.setProperty('--vvt',vv.offsetTop+'px')}else{r.removeProperty('--vvh');r.removeProperty('--vvt')}}
+if(vv){vv.addEventListener('resize',fitVV);vv.addEventListener('scroll',fitVV)}
+narrow.addEventListener('change',fitVV);fitVV();
+$('f').addEventListener('focusin',e=>{if(narrow.matches&&e.target.matches('input,select,textarea'))setTimeout(()=>e.target.scrollIntoView({block:'nearest'}),350)});
 const touch=matchMedia('(pointer:coarse)').matches;
 $('save').textContent=touch&&navigator.canShare?'Save or share':'Save image';
 $('save').addEventListener('click',async()=>{draw();const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.93));if(!blob){toast('Could not create the image');return}
