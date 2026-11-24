@@ -112,7 +112,7 @@ form{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(
 <body>
 <header>
 <h1>Race result post maker</h1>
-<p>Add a photo, the race and the finish time, then save a 1080px image ready for Instagram. Race details and your style are remembered between sessions.</p>
+<p>Add a photo, the race and the finish time, then save a 1080px image ready for Instagram. Your style and logo are remembered between sessions.</p>
 </header>
 <main>
 <section class="stage" aria-label="Preview">
@@ -130,13 +130,13 @@ form{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(
 
 <fieldset data-tab="Athlete"><legend>Athlete and result</legend>
 <div class="g2">
-<label>Athlete name<input id="name" value="Dana Whitfield"></label>
+<label>Athlete name<input id="name" placeholder="Athlete name"></label>
 <label>Headline<select id="head">
 <option>Personal best</option><option>Debut</option><option>Course best</option><option>Age-group podium</option><option>Boston qualifier</option><option>Negative split</option><option>Finisher</option><option value="custom">Custom…</option>
 </select></label>
 <label id="customWrap" hidden>Custom headline<input id="custom" placeholder="First sub-3"></label>
-<label><span>Finish time <small>type digits, colons fill in</small></span><input id="time" value="1:19:42" placeholder="1:19:42" inputmode="numeric"></label>
-<label><span>Previous best <small>optional</small></span><input id="prev" value="1:21:15" placeholder="1:21:15" inputmode="numeric"></label>
+<label><span>Finish time <small>type digits, colons fill in</small></span><input id="time" value="" placeholder="1:19:42" inputmode="numeric"></label>
+<label><span>Previous best <small>optional</small></span><input id="prev" value="" placeholder="1:21:15" inputmode="numeric"></label>
 <label><span>Place <small>optional</small></span><input id="place" placeholder="14th overall, 3rd F30-34"></label>
 </div>
 <label><span>Quote <small>optional</small></span><textarea id="quote" rows="2" placeholder="A line from the athlete"></textarea></label>
@@ -144,8 +144,8 @@ form{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(
 
 <fieldset data-tab="Race"><legend>Race</legend>
 <div class="g2">
-<label>Race name<input id="race" value="Philadelphia Half Marathon"></label>
-<label>Date<input type="date" id="date" value="2026-11-22"></label>
+<label>Race name<input id="race" placeholder="Philadelphia Half Marathon"></label>
+<label>Date<input type="date" id="date"></label>
 <label>Distance<select id="dist">
 <option value="5k">5K</option><option value="10k">10K</option><option value="10mi">10 mile</option><option value="half" selected>Half marathon</option><option value="full">Marathon</option><option value="other">Other</option>
 </select></label>
@@ -170,7 +170,7 @@ form{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(
 <div><div class="lbl">Accent colour</div>
 <div class="sw" id="sw"></div></div>
 <div class="lrow"><label class="file"><input type="file" id="logoIn" accept="image/*"><span>Add team logo</span></label><img id="logoPrev" alt="Logo preview" hidden><button type="button" id="logoX" hidden>Remove logo</button></div>
-<label>Your handle<input id="handle" value="@miles.with.jon"></label>
+<label>Your handle<input id="handle" placeholder="@yourhandle"></label>
 </fieldset>
 <fieldset data-tab="Sizes"><legend>Sizes</legend>
 <div class="szs" id="sizes"></div>
@@ -340,16 +340,19 @@ $('acc').addEventListener('input',e=>{st.accent=e.target.value;store.set('accent
 
 // restore remembered style
 for(const k of ['layout','size']){const v=store.get(k);if(v&&(k==='layout'?L[v]:SIZES[v])){st[k]=v;const r=document.querySelector(`input[name=${k}][value=${v}]`);if(r)r.checked=true}}
-{const a=store.get('accent');if(a&&/^#[0-9a-f]{6}$/i.test(a))st.accent=a;const h=store.get('handle');if(h!==null)$('handle').value=h;const lg=store.get('logo');if(lg)setLogo(lg,false)}
+{const a=store.get('accent');if(a&&/^#[0-9a-f]{6}$/i.test(a))st.accent=a;const lg=store.get('logo');if(lg)setLogo(lg,false)}
 paintSw();
-const KEEP=['race','date','dist','km','unit','head','custom'];
+// text fields always start blank; only choices (distance, units, headline, pace) are remembered
+const TEXT=['name','time','prev','place','quote','race','date','km','custom','handle'];
+for(const id of TEXT){$(id).value='';$(id).dataset.d=''}
+for(const k of ['handle','f-race','f-date','f-km','f-custom'])store.set(k,null);
+const KEEP=['dist','unit','head'];
 for(const id of KEEP){const v=store.get('f-'+id);if(v!==null)$(id).value=v}
 {const v=store.get('f-pace');if(v!==null)$('pace').checked=v==='1'}
 $('customWrap').hidden=$('head').value!=='custom';$('kmWrap').hidden=$('dist').value!=='other';
 
 $('f').addEventListener('input',e=>{const t=e.target;
   if(t.name==='layout'||t.name==='size'){st[t.name]=t.value;store.set(t.name,t.value)}
-  if(t.id==='handle')store.set('handle',t.value);
   if(KEEP.includes(t.id))store.set('f-'+t.id,t.value);
   if(t.id==='pace')store.set('f-pace',t.checked?'1':'0');
   $('customWrap').hidden=$('head').value!=='custom';$('kmWrap').hidden=$('dist').value!=='other';req()});
