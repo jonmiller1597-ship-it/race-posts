@@ -1,5 +1,5 @@
 // Offline support: app files are cached on install; Google Fonts are cached the first time they load.
-const CACHE = "race-posts-v1";
+const CACHE = "race-posts-v2";
 const APP = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

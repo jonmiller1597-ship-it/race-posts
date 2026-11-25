@@ -105,26 +105,62 @@ main{position:fixed;left:0;right:0;top:0;height:var(--vvh,100dvh);transform:tran
 .tabs{gap:4px}.tabs button{flex:1 1 0;padding:7px 2px;font-size:14px;min-height:40px}
 .acts button{min-height:40px;padding:7px 18px;font-size:15px}
 form{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+.acts .icon{width:46px;padding:0}
 }
-@media(prefers-reduced-motion:reduce){#toast{transition:none}}
+.icon{display:inline-grid;place-items:center;width:46px;padding:0}
+.icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+/* drafts drawer */
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:6;opacity:0;pointer-events:none;transition:opacity .2s}
+#scrim.on{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;bottom:0;left:0;width:min(380px,88vw);background:var(--bg);z-index:7;transform:translateX(-102%);visibility:hidden;transition:transform .22s ease,visibility 0s .22s;display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:14px;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));box-shadow:4px 0 24px rgba(0,0,0,.25)}
+#drawer.on{transform:none;visibility:visible;transition:transform .22s ease}
+.dh{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dh h2{margin:0;font:600 24px/1.1 "Inter Tight",Arial,sans-serif;letter-spacing:-.01em}
+.dh p{margin:4px 0 0;color:var(--mut);font-size:14px}
+#dlist{list-style:none;margin:0;padding:2px;overflow-y:auto;overscroll-behavior:contain;display:grid;gap:8px;align-content:start}
+.dr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;border:1.5px solid var(--line);border-radius:10px;padding:6px 8px 6px 6px}
+.dr.cur{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.dr .open{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center;text-align:left;border:0;padding:0;min-height:70px;border-radius:6px;background:none;font-weight:400}
+.dr img{width:56px;height:70px;object-fit:cover;border-radius:4px;background:#8a867e}
+.dr b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:16px;font-weight:600}
+.dr small{display:block;color:var(--mut);font-weight:500;font-size:13px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr .del{min-height:38px;padding:6px 12px;font-size:14px}
+.empty{color:var(--mut);margin:4px 2px}
+/* per-element text styles */
+.ers{display:grid;gap:10px}
+.er{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.erh{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:36px}
+.erh b{font-size:16px}
+.mini{min-height:36px;padding:4px 14px;font-size:14px}
+.erc{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.erc select{flex:1 1 170px;width:auto!important}
+.cols{display:flex;gap:7px;align-items:center}
+.cols button{width:36px;height:36px;min-height:0;padding:0;border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 0 1.5px var(--line);font:700 11px "Inter Tight",Arial,sans-serif}
+.cols button[aria-pressed=true]{box-shadow:0 0 0 3px var(--ink)}
+.cols .auto{background:var(--pan);color:var(--ink)}
+.cols input[type=color]{width:42px;height:38px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);padding:3px;cursor:pointer}
+.cols input.on{box-shadow:0 0 0 3px var(--ink)}
+.er .sz{grid-template-columns:3em minmax(0,1fr) 3.4em}
+.er .sz label{font-weight:500;color:var(--mut)}
+@media(prefers-reduced-motion:reduce){#toast,#drawer,#scrim{transition:none}}
 </style>
 </head>
 <body>
 <header>
 <h1>Race result post maker</h1>
-<p>Add a photo, the race and the finish time, then save a 1080px image ready for Instagram. Your style and logo are remembered between sessions.</p>
+<p>Add a photo, the race and the finish time, then save a 1080px image ready for Instagram. Posts save as drafts while you work; open them from the menu.</p>
 </header>
-<main>
+<main id="app">
 <section class="stage" aria-label="Preview">
 <canvas id="cv" width="1080" height="1350" aria-label="Post preview"></canvas>
 <p class="hint">Drag the photo to reposition it. Tap the preview, or drop a file on it, to add a photo.</p>
-<div class="acts"><button type="button" id="save" class="primary">Save image</button><button type="button" id="next">Next athlete</button></div>
+<div class="acts"><button type="button" id="menu" class="icon" aria-label="Drafts" aria-controls="drawer" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><button type="button" id="save" class="primary">Save image</button><button type="button" id="next">Next athlete</button></div>
 </section>
 <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
 
 <form id="f" autocomplete="off" onsubmit="return false">
 <fieldset data-tab="Photo"><legend>Photo</legend>
-<div class="inl"><label class="file"><input type="file" id="photo" accept="image/*"><span>Choose athlete photo</span></label></div>
+<div class="inl"><label class="file"><input type="file" id="photo" accept="image/*"><span>Choose athlete photo</span></label><button type="button" id="photoX" hidden>Remove photo</button></div>
 <label for="zoom">Zoom<input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></label>
 </fieldset>
 
@@ -135,8 +171,8 @@ form{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(
 <option>Personal best</option><option>Debut</option><option>Course best</option><option>Age-group podium</option><option>Boston qualifier</option><option>Negative split</option><option>Finisher</option><option value="custom">Custom…</option>
 </select></label>
 <label id="customWrap" hidden>Custom headline<input id="custom" placeholder="First sub-3"></label>
-<label><span>Finish time <small>type digits, colons fill in</small></span><input id="time" value="" placeholder="1:19:42" inputmode="numeric"></label>
-<label><span>Previous best <small>optional</small></span><input id="prev" value="" placeholder="1:21:15" inputmode="numeric"></label>
+<label><span>Finish time <small>type digits, colons fill in</small></span><input id="time" placeholder="1:19:42" inputmode="numeric"></label>
+<label><span>Previous best <small>optional</small></span><input id="prev" placeholder="1:21:15" inputmode="numeric"></label>
 <label><span>Place <small>optional</small></span><input id="place" placeholder="14th overall, 3rd F30-34"></label>
 </div>
 <label><span>Quote <small>optional</small></span><textarea id="quote" rows="2" placeholder="A line from the athlete"></textarea></label>
@@ -166,18 +202,28 @@ form{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(
 <label><input type="radio" name="size" value="square"><span>Square</span></label>
 <label><input type="radio" name="size" value="story"><span>Story 9:16</span></label>
 </div>
-<div><div class="lbl">Font</div><div class="fonts" id="fonts" role="radiogroup" aria-label="Font"></div></div>
+<div><div class="lbl">Post font</div><div class="fonts" id="fonts" role="radiogroup" aria-label="Post font"></div></div>
 <div><div class="lbl">Accent colour</div>
 <div class="sw" id="sw"></div></div>
 <div class="lrow"><label class="file"><input type="file" id="logoIn" accept="image/*"><span>Add team logo</span></label><img id="logoPrev" alt="Logo preview" hidden><button type="button" id="logoX" hidden>Remove logo</button></div>
 <label>Your handle<input id="handle" placeholder="@yourhandle"></label>
 </fieldset>
-<fieldset data-tab="Sizes"><legend>Sizes</legend>
-<div class="szs" id="sizes"></div>
-<div><button type="button" id="szReset">Reset sizes</button></div>
+
+<fieldset data-tab="Text"><legend>Text styles</legend>
+<p class="hint" style="text-align:left;display:block">Set a font, colour and size for each line. Default follows the post font and layout.</p>
+<div class="ers" id="ers"></div>
+<div><button type="button" id="esReset">Reset all text styles</button></div>
 </fieldset>
 </form>
 </main>
+
+<div id="scrim"></div>
+<aside id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+<div class="dh"><div><h2 id="dTitle">Drafts</h2><p>Saved on this device as you work.</p></div><button type="button" id="dClose" class="icon" aria-label="Close drafts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<button type="button" id="newPost" class="primary">New post</button>
+<div style="min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr)"><p class="empty" id="dEmpty" hidden>No drafts yet. Anything you type or a photo you add is saved here automatically.</p><ul id="dlist"></ul></div>
+</aside>
+
 <div id="ov" role="dialog" aria-modal="true" aria-label="Save image"><div class="box"><img id="ovImg" alt="Finished post"><p>Press and hold the image to save it to Photos, or right-click and choose Save image.</p><button type="button" id="ovX">Done</button></div></div>
 <div id="toast" role="status"></div>
 <script>
@@ -186,6 +232,7 @@ const $=id=>document.getElementById(id);
 const cv=$('cv'),ctx=cv.getContext('2d');
 let T='"Inter Tight",Inter,Arial,sans-serif';
 const q=f=>`"${f}",Arial,sans-serif`;
+// post-wide font presets
 const FONTS={
   clean:{label:'Clean',t:q('Inter Tight'),tw:300,dots:1,n:q('Inter Tight'),nw:600,x:q('Inter Tight')},
   serif:{label:'Serif',t:'"Instrument Serif",Georgia,serif',tw:400,n:'"Instrument Serif",Georgia,serif',nw:400,ns:1.3,x:q('Inter Tight')},
@@ -193,15 +240,27 @@ const FONTS={
   mono:{label:'Stopwatch',t:'"DM Mono",ui-monospace,monospace',tw:300,n:q('DM Sans'),nw:600,x:q('DM Sans')},
   bold:{label:'Bold',t:q('Anton'),tw:400,n:q('Inter Tight'),nw:700,x:q('Inter Tight')},
   round:{label:'Geometric',t:q('Outfit'),tw:200,dots:1,n:q('Outfit'),nw:600,x:q('Outfit')}};
+// single families for per-element overrides; w = [light, regular, bold] weights that are loaded
+const FAM={
+  inter:{label:'Inter Tight',f:q('Inter Tight'),w:[300,500,600],dots:1},
+  serif:{label:'Instrument Serif',f:'"Instrument Serif",Georgia,serif',w:[400,400,400],s:1.2},
+  barlowc:{label:'Barlow Condensed',f:q('Barlow Condensed'),w:[500,500,600],s:1.12},
+  barlow:{label:'Barlow',f:q('Barlow'),w:[400,500,600]},
+  dmsans:{label:'DM Sans',f:q('DM Sans'),w:[400,500,600]},
+  mono:{label:'DM Mono',f:'"DM Mono",ui-monospace,monospace',w:[300,300,300]},
+  outfit:{label:'Outfit',f:q('Outfit'),w:[200,500,600],dots:1},
+  anton:{label:'Anton',f:q('Anton'),w:[400,400,400]}};
 let P=FONTS.clean;
-const ZK=[['time','Time'],['prog','Old → new time'],['name','Name'],['race','Race and date'],['stats','Stats line'],['head','Headline'],['quote','Quote'],['handle','Handle'],['logo','Logo']];
+const ZK=[['time','Time'],['prog','Old → new time'],['name','Name'],['race','Race and date'],['stats','Place and pace'],['head','Headline'],['quote','Quote'],['handle','Handle'],['logo','Logo']];
+const EK=ZK.filter(([k])=>k!=='logo');
 const Z=Object.fromEntries(ZK.map(([k])=>[k,1]));
+const ES=Object.fromEntries(EK.map(([k])=>[k,{font:'',color:''}]));
 const SIZES={post:[1080,1350],square:[1080,1080],story:[1080,1920]};
 const MI={'5k':3.10686,'10k':6.21371,'10mi':10,'half':13.1094,'full':26.2188};
 const DN={'5k':'5K','10k':'10K','10mi':'10 Mile','half':'Half Marathon','full':'Marathon'};
 const SW=['#4cc3ea','#e2482d','#d7f23b','#2457ff','#ff8a1f','#16a36b'];
-const st={layout:'overlay',size:'post',accent:SW[0]};
-let W=1080,H=1350,img=null,logo=null,px=0,py=0,raf=0;
+const st={layout:'overlay',size:'post',accent:SW[0],font:'clean'};
+let W=1080,H=1350,img=null,logo=null,px=0,py=0,raf=0,ACC='#fff';
 const store={get(k){try{return localStorage.getItem('rrp-'+k)}catch(e){return null}},set(k,v){try{v==null?localStorage.removeItem('rrp-'+k):localStorage.setItem('rrp-'+k,v)}catch(e){}}};
 
 const parseT=s=>{const p=String(s).trim().split(':').map(Number);if(p.length<2||p.some(n=>isNaN(n)))return null;return p.reduce((a,n)=>a*60+n,0)};
@@ -210,7 +269,6 @@ const fmtT=t=>{t=Math.round(t);const h=Math.floor(t/3600),m=Math.floor(t%3600/60
 const rgb=h=>{h=h.replace('#','');if(h.length===3)h=[...h].map(c=>c+c).join('');const n=parseInt(h,16);return[n>>16&255,n>>8&255,n&255]};
 const lum=h=>{const c=rgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:((v+.055)/1.055)**2.4});return .2126*c[0]+.7152*c[1]+.0722*c[2]};
 const mix=(h,k,a)=>{const x=rgb(h),y=rgb(k);return`rgb(${x.map((v,i)=>Math.round(v+(y[i]-v)*a)).join(',')})`};
-const onA=h=>lum(h)>.2?'#111111':'#ffffff';
 const deep=h=>lum(h)>.25?mix(h,'#000000',lum(h)>.55?.55:.38):h;
 const lite=h=>lum(h)<.18?mix(h,'#ffffff',.45):h;
 
@@ -225,13 +283,22 @@ function data(){
   if(dv){const [y,m,d]=dv.split('-').map(Number);date=new Date(y,m-1,d).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}
   const dist=dk==='other'?($('km').value?$('km').value+'K':''):DN[dk];
   return{name:$('name').value.trim()||'Athlete name',race:$('race').value.trim()||'Race name',meta:[dist,date].filter(Boolean).join('  /  '),
-    time:$('time').value.trim()||'0:00',prev:g?fmtT(p):'',gain:g?(g<60?g+' sec faster':fmtT(g)+' faster'):'',gainS:g?(g<60?g+'s':fmtT(g)):'',
+    time:$('time').value.trim()||'0:00',prev:g?fmtT(p):'',gain:g?(g<60?g+' sec faster':fmtT(g)+' faster'):'',
     head,place:$('place').value.trim(),quote:$('quote').value.trim(),pace,handle:$('handle').value.trim()};
 }
 
+// element font: per-element override if set, otherwise the post font. role 0 light, 1 regular, 2 bold
+function el(k,role){const o=ES[k]&&FAM[ES[k].font];
+  if(o)return{f:o.f,w:(k==='quote'?'italic ':'')+o.w[role],sc:k==='time'?1:(o.s||1),dots:o.dots};
+  if(k==='time')return{f:P.t,w:P.tw,sc:1,dots:P.dots};
+  if(k==='name')return{f:P.n,w:P.nw,sc:P.ns||1};
+  return{f:P.x,w:k==='quote'?'italic 400':(role===2?600:500),sc:1}}
+const SF=(k,s,role=1)=>{const e=el(k,role);ctx.font=`${e.w} ${s}px ${e.f}`};
+const sc=(k,role=1)=>el(k,role).sc;
+// element colour: override if set ('accent' follows the accent), otherwise the layout's colour
+const C=(k,def)=>{const c=ES[k]&&ES[k].color;return !c?def:c==='accent'?ACC:c};
 const F=(w,s,f)=>{ctx.font=`${w} ${s}px ${f||T}`};
-function fit(t,maxW,max,min,w,f){let s=max;F(w,s,f);while(s>min&&ctx.measureText(t).width>maxW){s-=2;F(w,s,f)}return s}
-function nm(t,maxW,max,min){const k=P.ns||1;return fit(t,maxW,Math.round(max*k),Math.round(min*k),P.nw,P.n)}
+function fitE(k,t,maxW,max,min,role=1){const c=sc(k,role);let s=Math.round(max*c);const mn=Math.round(min*c);SF(k,s,role);while(s>mn&&ctx.measureText(t).width>maxW){s-=2;SF(k,s,role)}return s}
 function wrap(t,maxW,max){const L=[];let cur='';for(const w of t.split(/\s+/)){const x=cur?cur+' '+w:w;if(cur&&ctx.measureText(x).width>maxW){L.push(cur);cur=w}else cur=x}if(cur)L.push(cur);if(L.length>max){L.length=max;let l=L[max-1];while(l&&ctx.measureText(l+'…').width>maxW)l=l.slice(0,-1);L[max-1]=l.trimEnd()+'…'}return L}
 function shade(y0,y1,a0,a1){const g=ctx.createLinearGradient(0,y0,0,y1);g.addColorStop(0,`rgba(0,0,0,${a0})`);g.addColorStop(1,`rgba(0,0,0,${a1})`);ctx.fillStyle=g;ctx.fillRect(0,y0,W,y1-y0)}
 function photo(x,y,w,h){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
@@ -241,115 +308,227 @@ function photo(x,y,w,h){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
     F(500,30);ctx.fillStyle='rgba(255,255,255,.85)';ctx.textAlign='center';ctx.fillText('Add a photo of your athlete',x+w/2,y+h*.38);ctx.textAlign='left'}
   ctx.restore()}
 function drawLogo(x,y,s,right){if(!logo)return;const k=Math.min(s/logo.width,s/logo.height),w=logo.width*k,h=logo.height*k;ctx.drawImage(logo,right?x-w:x,y,w,h)}
-const stats=d=>[d.place&&{t:d.place},d.pace&&{t:d.pace}].filter(Boolean);
+const stats=d=>[d.place,d.pace].filter(Boolean);
 // old time struck through -> new time, then the gain
-function progW(d,s){F(500,s);const a=ctx.measureText(d.prev).width;F(600,s);return a+s*2.1+ctx.measureText(d.time).width+s*1.1+ctx.measureText(d.gain).width}
-function prog(d,x,y,s,col,mut,acc,maxW){while(s>12&&progW(d,s)>maxW)s-=1;const g=s*.5,al=s*1.1,mid=y-s*.35,lw=Math.max(2,s*.075);
-  F(500,s);ctx.fillStyle=mut;ctx.fillText(d.prev,x,y);const a=ctx.measureText(d.prev).width;ctx.fillRect(x-3,mid-lw/2,a+6,lw);
-  let cx=x+a+g;ctx.save();ctx.strokeStyle=mut;ctx.lineWidth=lw;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(cx,mid);ctx.lineTo(cx+al,mid);ctx.moveTo(cx+al-s*.3,mid-s*.27);ctx.lineTo(cx+al,mid);ctx.lineTo(cx+al-s*.3,mid+s*.27);ctx.stroke();ctx.restore();
-  cx+=al+g;F(600,s);ctx.fillStyle=col;ctx.fillText(d.time,cx,y);cx+=ctx.measureText(d.time).width+s*1.1;ctx.fillStyle=acc;ctx.fillText(d.gain,cx,y)}
-function row(arr,x,y,size,col,acc,maxW){const tot=s=>{F(500,s);return arr.reduce((a,it)=>a+ctx.measureText(it.t).width,0)+s*1.2*(arr.length-1)};while(maxW&&size>12&&tot(size)>maxW)size-=1;F(500,size);const gap=size*1.2;let cx=x;for(const it of arr){ctx.fillStyle=it.a?acc:col;ctx.fillText(it.t,cx,y);cx+=ctx.measureText(it.t).width+gap}}
+function progW(d,s){SF('prog',s,1);const a=ctx.measureText(d.prev).width;SF('prog',s,2);return a+s*2.1+ctx.measureText(d.time).width+s*1.1+ctx.measureText(d.gain).width}
+function prog(d,x,y,s,col,mut,acc,maxW){const oc=ES.prog.color;if(oc){col=C('prog',col);mut=col}
+  while(s>12&&progW(d,s)>maxW)s-=1;const g=s*.5,al=s*1.1,mid=y-s*.35,lw=Math.max(2,s*.075);
+  ctx.save();if(oc)ctx.globalAlpha*=.6;
+  SF('prog',s,1);ctx.fillStyle=mut;ctx.fillText(d.prev,x,y);const a=ctx.measureText(d.prev).width;ctx.fillRect(x-3,mid-lw/2,a+6,lw);
+  let cx=x+a+g;ctx.strokeStyle=mut;ctx.lineWidth=lw;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(cx,mid);ctx.lineTo(cx+al,mid);ctx.moveTo(cx+al-s*.3,mid-s*.27);ctx.lineTo(cx+al,mid);ctx.lineTo(cx+al-s*.3,mid+s*.27);ctx.stroke();ctx.restore();
+  cx+=al+g;SF('prog',s,2);ctx.fillStyle=col;ctx.fillText(d.time,cx,y);cx+=ctx.measureText(d.time).width+s*1.1;ctx.fillStyle=acc;ctx.fillText(d.gain,cx,y)}
+function row(arr,x,y,size,col,maxW){const tot=s=>{SF('stats',s);return arr.reduce((a,t)=>a+ctx.measureText(t).width,0)+s*1.2*(arr.length-1)};while(maxW&&size>12&&tot(size)>maxW)size-=1;SF('stats',size);const gap=size*1.2;let cx=x;ctx.fillStyle=col;for(const t of arr){ctx.fillText(t,cx,y);cx+=ctx.measureText(t).width+gap}}
 const CW=.3;
-function asc(s){F(P.tw,s,P.t);return ctx.measureText('0').actualBoundingBoxAscent||s*.73}
-function timeW(t,s){F(P.tw,s,P.t);if(!P.dots)return ctx.measureText(t).width;let w=0;for(const ch of t)w+=ch===':'?s*CW:ctx.measureText(ch).width;return w}
+const TF=(s)=>{const e=el('time',0);ctx.font=`${e.w} ${s}px ${e.f}`;return e};
+function asc(s){TF(s);return ctx.measureText('0').actualBoundingBoxAscent||s*.73}
+function timeW(t,s){const e=TF(s);if(!e.dots)return ctx.measureText(t).width;let w=0;for(const ch of t)w+=ch===':'?s*CW:ctx.measureText(ch).width;return w}
 function fitTime(t,maxW,max,min){let s=max;while(s>min&&timeW(t,s)>maxW)s-=2;return s}
-function drawTime(t,x,y,s){const a=asc(s);F(P.tw,s,P.t);if(!P.dots){ctx.fillText(t,x,y);return}let cx=x;const r=s*.045;for(const ch of t){if(ch===':'){const c=cx+s*CW/2;for(const dy of [r+s*.01,a*.71]){ctx.beginPath();ctx.arc(c,y-dy,r,0,7);ctx.fill()}cx+=s*CW}else{ctx.fillText(ch,cx,y);cx+=ctx.measureText(ch).width}}}
+function drawTime(t,x,y,s){const a=asc(s),e=TF(s);if(!e.dots){ctx.fillText(t,x,y);return}let cx=x;const r=s*.045;for(const ch of t){if(ch===':'){const c=cx+s*CW/2;for(const dy of [r+s*.01,a*.71]){ctx.beginPath();ctx.arc(c,y-dy,r,0,7);ctx.fill()}cx+=s*CW}else{ctx.fillText(ch,cx,y);cx+=ctx.measureText(ch).width}}}
 const story=()=>st.size==='story';
 
 function overlay(d){
-  const pd=72,sm=story()?250:76,top=story()?200:64,acc=lite(st.accent),sts=stats(d),rl=[d.race,d.meta].filter(Boolean).join('  /  ');
-  const hs=26*Z.head,hds=24*Z.handle,ss=26*Z.stats,qs=30*Z.quote;
+  const pd=72,sm=story()?250:76,top=story()?200:64,acc=lite(st.accent),sts=stats(d),rl=[d.race,d.meta].filter(Boolean).join('  /  ');ACC=acc;
+  const hs=26*Z.head*sc('head',2),hds=24*Z.handle*sc('handle'),ss=26*Z.stats*sc('stats'),qs=30*Z.quote*sc('quote');
   photo(0,0,W,H);shade(H*.38,H,0,.78);if(logo||d.handle)shade(0,H*.22,.3,0);
   drawLogo(pd,top,90*Z.logo,false);
-  if(d.handle){F(500,hds);ctx.fillStyle='rgba(255,255,255,.85)';ctx.textAlign='right';ctx.fillText(d.handle,W-pd,top+hds*1.2);ctx.textAlign='left'}
+  if(d.handle){SF('handle',hds);ctx.fillStyle=C('handle','rgba(255,255,255,.85)');ctx.textAlign='right';ctx.fillText(d.handle,W-pd,top+hds*1.2);ctx.textAlign='left'}
   ctx.save();ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=12;
-  let y=H-sm;const rs=fit(rl,W-pd*2,28*Z.race,14,500);
-  if(sts.length){row(sts,pd,y,ss,'rgba(255,255,255,.8)',acc,W-pd*2);y-=ss*.75+24+rs*.25}
-  F(500,rs);ctx.fillStyle='rgba(255,255,255,.78)';ctx.fillText(rl,pd,y);
-  const ns=nm(d.name,W-pd*2,44*Z.name,18);y-=rs*.75+22+ns*.25;ctx.fillStyle='#fff';ctx.fillText(d.name,pd,y);
-  const ps=30*Z.prog;if(d.prev){y-=ns*.75+22+ps*.25;prog(d,pd,y,ps,'#fff','rgba(255,255,255,.62)',acc,W-pd*2);y-=ps*.75+24}else y-=ns*.75+26;
-  const ts=fitTime(d.time,W-pd*2,220*Z.time,50);ctx.fillStyle='#fff';drawTime(d.time,pd,y,ts);y-=asc(ts)+40;
-  if(d.head){y-=hs*.25;F(600,hs);ctx.fillStyle=acc;ctx.fillText(d.head,pd,y);y-=hs*.75+26}
-  if(d.quote){F('italic 400',qs);const Q=wrap(d.quote,W-pd*2-120,3);y-=qs*.25;ctx.fillStyle='rgba(255,255,255,.9)';Q.forEach((l,i)=>ctx.fillText(l,pd,y-(Q.length-1-i)*qs*1.4))}
+  let y=H-sm;const rs=fitE('race',rl,W-pd*2,28*Z.race,14);
+  if(sts.length){row(sts,pd,y,ss,C('stats','rgba(255,255,255,.8)'),W-pd*2);y-=ss*.75+24+rs*.25}
+  SF('race',rs);ctx.fillStyle=C('race','rgba(255,255,255,.78)');ctx.fillText(rl,pd,y);
+  const ns=fitE('name',d.name,W-pd*2,44*Z.name,18,2);y-=rs*.75+22+ns*.25;ctx.fillStyle=C('name','#fff');ctx.fillText(d.name,pd,y);
+  const ps=30*Z.prog*sc('prog');if(d.prev){y-=ns*.75+22+ps*.25;prog(d,pd,y,ps,'#fff','rgba(255,255,255,.62)',acc,W-pd*2);y-=ps*.75+24}else y-=ns*.75+26;
+  const ts=fitTime(d.time,W-pd*2,220*Z.time,50);ctx.fillStyle=C('time','#fff');drawTime(d.time,pd,y,ts);y-=asc(ts)+40;
+  if(d.head){y-=hs*.25;SF('head',hs,2);ctx.fillStyle=C('head',acc);ctx.fillText(d.head,pd,y);y-=hs*.75+26}
+  if(d.quote){SF('quote',qs);const Q=wrap(d.quote,W-pd*2-120,3);y-=qs*.25;ctx.fillStyle=C('quote','rgba(255,255,255,.9)');Q.forEach((l,i)=>ctx.fillText(l,pd,y-(Q.length-1-i)*qs*1.4))}
   ctx.restore();
 }
 
 function print(d){
-  const m=story()?64:52,mt=story()?200:m,sb=story()?200:0,ink='#161616',grey='#77736b',acc=deep(st.accent),sts=stats(d),rl=[d.race,d.meta].filter(Boolean).join('  /  ');
-  const iw=W-m*2,hs=22*Z.head,hds=22*Z.handle,ss=24*Z.stats,qs=26*Z.quote;
+  const m=story()?64:52,mt=story()?200:m,sb=story()?200:0,ink='#161616',grey='#77736b',acc=deep(st.accent),sts=stats(d),rl=[d.race,d.meta].filter(Boolean).join('  /  ');ACC=acc;
+  const iw=W-m*2,hs=22*Z.head*sc('head',2),hds=22*Z.handle*sc('handle'),ss=24*Z.stats*sc('stats'),qs=26*Z.quote*sc('quote');
   ctx.fillStyle='#f7f6f2';ctx.fillRect(0,0,W,H);
   const ts=fitTime(d.time,iw*.6,150*Z.time,40),tw=timeW(d.time,ts),a=asc(ts);
-  const ns=nm(d.name,Math.max(120,iw-tw-40),44*Z.name,16),rs=fit(rl,iw,26*Z.race,14,500);
-  F('italic 400',qs);const Q=d.quote?wrap(d.quote,iw,2):[];
-  let o=40+Math.max(a,ns*.75+(d.head?18+hs:0));const yT=o,ps=26*Z.prog;let yP=0;
+  const ns=fitE('name',d.name,Math.max(120,iw-tw-40),44*Z.name,16,2),rs=fitE('race',rl,iw,26*Z.race,14);
+  SF('quote',qs);const Q=d.quote?wrap(d.quote,iw,2):[];
+  let o=40+Math.max(a,ns*.75+(d.head?18+hs:0));const yT=o,ps=26*Z.prog*sc('prog');let yP=0;
   if(d.prev){o+=ns*.25+18+ps*.75;yP=o;o+=ps*.25+14+rs*.75}else o+=ns*.25+16+rs*.75;const yR=o;let last=rs,yS=0;
   if(sts.length){o+=rs*.25+16+ss*.75;yS=o;last=ss}
   const yQ=[];Q.forEach((_,i)=>{o+=i?qs*1.45:last*.25+14+qs*.75;yQ.push(o)});if(Q.length)last=qs;
   const th=o+last*.25+(d.handle?hds+52:36),pb=H-sb-th;
   photo(m,mt,iw,pb-mt);
-  ctx.fillStyle=ink;drawTime(d.time,W-m-tw,pb+yT,ts);
-  if(d.head){F(600,hs);ctx.fillStyle=acc;ctx.fillText(d.head,m,pb+yT-ns*.75-18)}
-  nm(d.name,Math.max(120,iw-tw-40),44*Z.name,16);ctx.fillStyle=ink;ctx.fillText(d.name,m,pb+yT);
+  ctx.fillStyle=C('time',ink);drawTime(d.time,W-m-tw,pb+yT,ts);
+  if(d.head){SF('head',hs,2);ctx.fillStyle=C('head',acc);ctx.fillText(d.head,m,pb+yT-ns*.75-18)}
+  SF('name',ns,2);ctx.fillStyle=C('name',ink);ctx.fillText(d.name,m,pb+yT);
   if(yP)prog(d,m,pb+yP,ps,ink,grey,acc,iw);
-  F(500,rs);ctx.fillStyle=grey;ctx.fillText(rl,m,pb+yR);
-  if(yS)row(sts,m,pb+yS,ss,grey,acc,iw);
-  if(Q.length){F('italic 400',qs);ctx.fillStyle=grey;Q.forEach((l,i)=>ctx.fillText(l,m,pb+yQ[i]))}
-  if(d.handle){F(500,hds);ctx.fillStyle=grey;ctx.textAlign='right';ctx.fillText(d.handle,W-m,H-sb-28);ctx.textAlign='left'}
+  SF('race',rs);ctx.fillStyle=C('race',grey);ctx.fillText(rl,m,pb+yR);
+  if(yS)row(sts,m,pb+yS,ss,C('stats',grey),iw);
+  if(Q.length){SF('quote',qs);ctx.fillStyle=C('quote',grey);Q.forEach((l,i)=>ctx.fillText(l,m,pb+yQ[i]))}
+  if(d.handle){SF('handle',hds);ctx.fillStyle=C('handle',grey);ctx.textAlign='right';ctx.fillText(d.handle,W-m,H-sb-28);ctx.textAlign='left'}
   drawLogo(W-m-28,mt+28,84*Z.logo,true);
 }
 
 function split(d){
-  const pd=72,sb=story()?220:0,acc=lite(st.accent),sts=stats(d),rl=[d.race,d.meta].filter(Boolean).join('  /  ');
-  const hs=24*Z.head,hds=22*Z.handle,ss=24*Z.stats,qs=28*Z.quote;
+  const pd=72,sb=story()?220:0,acc=lite(st.accent),sts=stats(d),rl=[d.race,d.meta].filter(Boolean).join('  /  ');ACC=acc;
+  const hs=24*Z.head*sc('head',2),hds=22*Z.handle*sc('handle'),ss=24*Z.stats*sc('stats'),qs=28*Z.quote*sc('quote');
   const ts=fitTime(d.time,W-pd*2,220*Z.time,50),a=asc(ts);
-  const ns=nm(d.name,W-pd*2,42*Z.name,18),rs=fit(rl,W-pd*2,26*Z.race,14,500);
-  F('italic 400',qs);const Q=d.quote?wrap(d.quote,W-pd*2,2):[];
+  const ns=fitE('name',d.name,W-pd*2,42*Z.name,18,2),rs=fitE('race',rl,W-pd*2,26*Z.race,14);
+  SF('quote',qs);const Q=d.quote?wrap(d.quote,W-pd*2,2):[];
   const t0=Math.max(d.head?hs:0,d.handle?hds:0);
-  const yH=64+t0*.75,yT=yH+t0*.25+28+a,ps=28*Z.prog,yP=d.prev?yT+24+ps*.75:0,yN=(yP?yP+ps*.25+24:yT+30)+ns*.75,yR=yN+ns*.25+rs*.75+14;
+  const yH=64+t0*.75,yT=yH+t0*.25+28+a,ps=28*Z.prog*sc('prog'),yP=d.prev?yT+24+ps*.75:0,yN=(yP?yP+ps*.25+24:yT+30)+ns*.75,yR=yN+ns*.25+rs*.75+14;
   let o=yR,last=rs,yS=0;if(sts.length){o+=rs*.25+ss*.75+18;yS=o;last=ss}
   const yQ=[];Q.forEach((_,i)=>{o+=i?qs*1.43:last*.25+qs*.75+22;yQ.push(o)});if(Q.length)last=qs;
   const ph=o+last*.25+56+sb,top=H-ph;
   photo(0,0,W,top+1);drawLogo(W-pd,story()?200:pd-16,90*Z.logo,true);
   ctx.fillStyle='#121212';ctx.fillRect(0,top,W,ph);
-  if(d.head){F(600,hs);ctx.fillStyle=acc;ctx.fillText(d.head,pd,top+yH)}
-  if(d.handle){F(500,hds);ctx.fillStyle='rgba(255,255,255,.55)';ctx.textAlign='right';ctx.fillText(d.handle,W-pd,top+yH);ctx.textAlign='left'}
-  ctx.fillStyle='#fff';drawTime(d.time,pd,top+yT,ts);
+  if(d.head){SF('head',hs,2);ctx.fillStyle=C('head',acc);ctx.fillText(d.head,pd,top+yH)}
+  if(d.handle){SF('handle',hds);ctx.fillStyle=C('handle','rgba(255,255,255,.55)');ctx.textAlign='right';ctx.fillText(d.handle,W-pd,top+yH);ctx.textAlign='left'}
+  ctx.fillStyle=C('time','#fff');drawTime(d.time,pd,top+yT,ts);
   if(yP)prog(d,pd,top+yP,ps,'#fff','rgba(255,255,255,.5)',acc,W-pd*2);
-  nm(d.name,W-pd*2,42*Z.name,18);ctx.fillStyle='#fff';ctx.fillText(d.name,pd,top+yN);
-  F(500,rs);ctx.fillStyle='rgba(255,255,255,.6)';ctx.fillText(rl,pd,top+yR);
-  if(yS)row(sts,pd,top+yS,ss,'rgba(255,255,255,.75)',acc,W-pd*2);
-  if(Q.length){F('italic 400',qs);ctx.fillStyle='rgba(255,255,255,.8)';Q.forEach((l,i)=>ctx.fillText(l,pd,top+yQ[i]))}
+  SF('name',ns,2);ctx.fillStyle=C('name','#fff');ctx.fillText(d.name,pd,top+yN);
+  SF('race',rs);ctx.fillStyle=C('race','rgba(255,255,255,.6)');ctx.fillText(rl,pd,top+yR);
+  if(yS)row(sts,pd,top+yS,ss,C('stats','rgba(255,255,255,.75)'),W-pd*2);
+  if(Q.length){SF('quote',qs);ctx.fillStyle=C('quote','rgba(255,255,255,.8)');Q.forEach((l,i)=>ctx.fillText(l,pd,top+yQ[i]))}
 }
 
 const L={overlay,print,split};
 function draw(){raf=0;const [w,h]=SIZES[st.size];if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}W=w;H=h;
-  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);ctx.textAlign='left';ctx.textBaseline='alphabetic';L[st.layout](data())}
-const req=()=>{if(!raf)raf=requestAnimationFrame(draw)};
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.globalAlpha=1;L[st.layout](data())}
+const req=()=>{if(!raf)raf=requestAnimationFrame(draw);queueSave()};
 
 let tt=0;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200)}
 function readImg(file,cb){if(!file)return;const u=URL.createObjectURL(file),im=new Image();im.onload=()=>cb(im);im.onerror=()=>toast('That file could not be opened as an image');im.src=u}
 function setLogo(src,save){const im=new Image();im.onload=()=>{let u=src;if(save){const c=document.createElement('canvas'),k=Math.min(1,320/Math.max(im.width,im.height));c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);u=c.toDataURL('image/png');store.set('logo',u)}
   const l=new Image();l.onload=()=>{logo=l;$('logoPrev').src=u;$('logoPrev').hidden=false;$('logoX').hidden=false;req()};l.src=u};im.src=src}
 
-// swatches
+/* ---------- drafts: autosaved to IndexedDB on this device ---------- */
+const DB={p:null,
+  open(){if(!this.p)this.p=new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('IndexedDB unavailable'));const r=indexedDB.open('race-posts',1);r.onupgradeneeded=()=>r.result.createObjectStore('drafts',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});return this.p},
+  async tx(mode,fn){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('drafts',mode),r=fn(t.objectStore('drafts'));t.oncomplete=()=>res(r&&r.result);t.onerror=t.onabort=()=>rej(t.error)})},
+  put(d){return this.tx('readwrite',s=>s.put(d))},get(id){return this.tx('readonly',s=>s.get(id))},all(){return this.tx('readonly',s=>s.getAll())},del(id){return this.tx('readwrite',s=>s.delete(id))}};
+const TEXT=['name','time','prev','place','quote','race','date','km','custom','handle'];
+const FIELDS=[...TEXT,'dist','unit','head'];
+let cur=null,curCreated=0,lastSnap='',photoBlob=null,photoVer=0,saveT=0;
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+function snap(){const f={};for(const id of FIELDS)f[id]=$(id).value;f.pace=$('pace').checked;
+  return{form:f,st:{...st},Z:{...Z},ES:JSON.parse(JSON.stringify(ES)),px:Math.round(px),py:Math.round(py),zoom:+$('zoom').value,pv:photoVer}}
+const hasContent=s=>!!photoBlob||['name','time','prev','place','quote','race','custom'].some(k=>s.form[k].trim());
+function queueSave(){clearTimeout(saveT);saveT=setTimeout(saveNow,700)}
+function thumb(){const c=document.createElement('canvas');c.width=168;c.height=Math.round(168*H/W);c.getContext('2d').drawImage(cv,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.72)}
+async function saveNow(){clearTimeout(saveT);const s=snap(),k=JSON.stringify(s);if(k===lastSnap)return;if(!cur&&!hasContent(s))return;
+  if(!cur){cur=uid();curCreated=Date.now()}lastSnap=k;if(raf){cancelAnimationFrame(raf);draw()}
+  const rec={id:cur,created:curCreated,updated:Date.now(),...s,photo:photoBlob,thumb:thumb()};
+  try{await DB.put(rec)}catch(e){lastSnap='';toast('Could not save the draft on this device')}
+  if($('drawer').classList.contains('on'))renderList()}
+function clearPost(keepRace){const ids=keepRace?['name','time','prev','place','quote']:TEXT;for(const id of ids){$(id).value='';$(id).dataset.d=''}
+  img=null;photoBlob=null;photoVer++;px=py=0;$('zoom').value=1;$('photo').value='';cur=null;syncForm();lastSnap=JSON.stringify(snap());draw()}
+async function newPost(keepRace){await saveNow();clearPost(keepRace)}
+function applyStyle(s,z,es){if(s){for(const k of ['layout','size'])if(s[k]&&(k==='layout'?L[s[k]]:SIZES[s[k]])){st[k]=s[k];store.set(k,s[k]);const r=document.querySelector(`input[name=${k}][value=${s[k]}]`);if(r)r.checked=true}
+    if(s.accent){st.accent=s.accent;store.set('accent',s.accent)}setFont(s.font||'clean')}
+  if(z)for(const k in Z)Z[k]=z[k]>=.6&&z[k]<=1.6?z[k]:1;
+  if(es)for(const k in ES)ES[k]={font:FAM[es[k]&&es[k].font]?es[k].font:'',color:(es[k]&&es[k].color)||''};
+  store.set('sizes',JSON.stringify(Z));store.set('el',JSON.stringify(ES));paintSw();paintES();loadUsed()}
+async function openDraft(id){await saveNow();let d;try{d=await DB.get(id)}catch(e){}if(!d){toast('That draft could not be opened');return}
+  cur=d.id;curCreated=d.created;
+  for(const id of FIELDS)$(id).value=d.form[id]??'';$('pace').checked=!!d.form.pace;
+  applyStyle(d.st,d.Z,d.ES);$('zoom').value=d.zoom||1;$('photo').value='';
+  photoBlob=d.photo||null;photoVer++;img=null;syncForm();
+  const done=()=>{px=d.px||0;py=d.py||0;draw();lastSnap=JSON.stringify(snap())};
+  if(photoBlob){const im=new Image();im.onload=()=>{img=im;done()};im.onerror=done;im.src=URL.createObjectURL(photoBlob)}
+  done();closeDrawer();toast('Draft opened')}
+async function delDraft(id){if(!confirm('Delete this draft? This cannot be undone.'))return;
+  try{await DB.del(id)}catch(e){toast('Could not delete the draft');return}
+  if(id===cur){clearTimeout(saveT);clearPost(false)}renderList()}
+const ago=t=>{const m=Math.round((Date.now()-t)/60000);if(m<1)return'just now';if(m<60)return m+' min ago';if(m<1440)return Math.round(m/60)+' h ago';
+  return new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric',year:new Date(t).getFullYear()===new Date().getFullYear()?undefined:'numeric'})};
+async function renderList(){let all=[];try{all=await DB.all()}catch(e){}
+  all.sort((a,b)=>b.updated-a.updated);const ul=$('dlist');ul.textContent='';$('dEmpty').hidden=all.length>0;
+  for(const d of all){const li=document.createElement('li');li.className='dr'+(d.id===cur?' cur':'');
+    const o=document.createElement('button');o.type='button';o.className='open';o.dataset.id=d.id;
+    const im=document.createElement('img');im.alt='';if(d.thumb)im.src=d.thumb;
+    const tx=document.createElement('span'),b=document.createElement('b'),s1=document.createElement('small'),s2=document.createElement('small');
+    const f=d.form||{};b.textContent=(f.name||'').trim()||'Untitled post';s1.textContent=[(f.time||'').trim(),(f.race||'').trim()].filter(Boolean).join(' · ')||'No result yet';
+    s2.textContent=(d.id===cur?'Editing now · ':'')+ago(d.updated);tx.append(b,s1,s2);o.append(im,tx);
+    const x=document.createElement('button');x.type='button';x.className='del';x.dataset.del=d.id;x.textContent='Delete';x.setAttribute('aria-label','Delete '+b.textContent);
+    li.append(o,x);ul.append(li)}}
+let lastFocus=null;
+async function openDrawer(){await saveNow();lastFocus=document.activeElement;renderList();$('drawer').classList.add('on');$('scrim').classList.add('on');$('app').inert=true;$('menu').setAttribute('aria-expanded','true');setTimeout(()=>$('dClose').focus(),50)}
+function closeDrawer(){if(!$('drawer').classList.contains('on'))return;$('drawer').classList.remove('on');$('scrim').classList.remove('on');$('app').inert=false;$('menu').setAttribute('aria-expanded','false');if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+$('menu').addEventListener('click',openDrawer);$('dClose').addEventListener('click',closeDrawer);$('scrim').addEventListener('click',closeDrawer);
+$('newPost').addEventListener('click',async()=>{await newPost(false);closeDrawer();showTab('Photo');toast('New post started')});
+$('dlist').addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(d){delDraft(d.dataset.del);return}const o=e.target.closest('[data-id]');if(o)openDraft(o.dataset.id)});
+addEventListener('pagehide',()=>saveNow());document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow()});
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}
+
+// accent swatches
 const sw=$('sw');
-function paintSw(){sw.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===st.accent));$('acc').value=st.accent}
+function paintSw(){sw.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===st.accent));$('acc').value=st.accent;document.querySelectorAll('.cols .acs').forEach(b=>b.style.background=st.accent)}
 sw.innerHTML=SW.map(c=>`<button type="button" data-c="${c}" style="background:${c}" aria-label="Accent ${c}"></button>`).join('')+'<input type="color" id="acc" aria-label="Custom accent colour">';
 sw.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.accent=b.dataset.c;store.set('accent',st.accent);paintSw();req()});
 $('acc').addEventListener('input',e=>{st.accent=e.target.value;store.set('accent',st.accent);paintSw();req()});
 
-// restore remembered style
+// post font picker
+const loadF=p=>document.fonts?Promise.all([`${p.tw} 100px ${p.t}`,`${p.nw} 40px ${p.n}`,`400 30px ${p.x}`,`500 30px ${p.x}`,`600 30px ${p.x}`,`italic 400 30px ${p.x}`].map(f=>document.fonts.load(f).catch(()=>{}))):Promise.resolve();
+const loadFam=id=>{const o=FAM[id];if(!o||!document.fonts)return Promise.resolve();return Promise.all([...new Set(o.w)].flatMap(w=>[`${w} 40px ${o.f}`,`italic ${w} 40px ${o.f}`]).map(f=>document.fonts.load(f).catch(()=>{})))};
+const loadUsed=()=>Promise.all(Object.values(ES).map(e=>loadFam(e.font))).then(draw);
+const fb=$('fonts');
+for(const [id,f] of Object.entries(FONTS)){const b=document.createElement('button');b.type='button';b.dataset.f=id;b.setAttribute('role','radio');
+  const sp=document.createElement('span');sp.className='ft';sp.style.fontFamily=f.t;sp.style.fontWeight=f.tw;sp.textContent='1:19:42';
+  const sm=document.createElement('small');sm.textContent=f.label;b.append(sp,sm);fb.append(b)}
+const paintF=()=>fb.querySelectorAll('button').forEach(b=>{const on=FONTS[b.dataset.f]===P;b.setAttribute('aria-pressed',on);b.setAttribute('aria-checked',on)});
+function setFont(id){if(!FONTS[id])id='clean';P=FONTS[id];T=P.x;st.font=id;store.set('font',id);paintF();req();loadF(P).then(draw)}
+fb.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setFont(b.dataset.f)});
+const syncSample=()=>{const t=$('time').value.trim()||'1:19:42';fb.querySelectorAll('.ft').forEach(x=>x.textContent=t)};
+$('time').addEventListener('input',syncSample);
+
+// per-element text styles: font, colour, size
+const COLS=[['','Auto','Layout colour'],['#ffffff','','White'],['#161616','','Black'],['accent','','Accent colour']];
+const ers=$('ers');
+for(const [k,l] of ZK){const r=document.createElement('div');r.className='er';r.dataset.k=k;
+  const h=document.createElement('div');h.className='erh';const b=document.createElement('b');b.textContent=l;
+  const rs=document.createElement('button');rs.type='button';rs.className='mini';rs.dataset.reset=k;rs.textContent='Reset';rs.setAttribute('aria-label','Reset '+l);h.append(b,rs);r.append(h);
+  if(k!=='logo'){const c=document.createElement('div');c.className='erc';
+    const s=document.createElement('select');s.dataset.font=k;s.setAttribute('aria-label',l+' font');
+    s.innerHTML='<option value="">Default font</option>'+Object.entries(FAM).map(([id,f])=>`<option value="${id}">${f.label}</option>`).join('');
+    const cl=document.createElement('div');cl.className='cols';cl.setAttribute('role','group');cl.setAttribute('aria-label',l+' colour');
+    for(const [v,t,a] of COLS){const x=document.createElement('button');x.type='button';x.dataset.col=v;x.dataset.k=k;x.setAttribute('aria-label',a);x.textContent=t;
+      if(!v)x.className='auto';else if(v==='accent')x.className='acs';else x.style.background=v;cl.append(x)}
+    const pk=document.createElement('input');pk.type='color';pk.dataset.pick=k;pk.value='#ff3b30';pk.setAttribute('aria-label',l+' custom colour');cl.append(pk);
+    c.append(s,cl);r.append(c)}
+  const z=document.createElement('div');z.className='sz';
+  const zl=document.createElement('label');zl.htmlFor='z-'+k;zl.textContent='Size';
+  const i=document.createElement('input');i.type='range';i.id='z-'+k;i.min=60;i.max=160;i.step=5;i.dataset.k=k;i.setAttribute('aria-label',l+' size');
+  const o=document.createElement('output');o.id='o-'+k;z.append(zl,i,o);r.append(z);ers.append(r)}
+function paintES(){for(const [k] of ZK){$('z-'+k).value=Math.round(Z[k]*100);$('o-'+k).textContent=Math.round(Z[k]*100)+'%';
+    if(k==='logo')continue;const e=ES[k],r=ers.querySelector(`.er[data-k="${k}"]`);r.querySelector('select').value=e.font;
+    const custom=e.color&&!COLS.some(([v])=>v===e.color);
+    r.querySelectorAll('[data-col]').forEach(x=>x.setAttribute('aria-pressed',!custom&&x.dataset.col===e.color));
+    const pk=r.querySelector('[data-pick]');pk.classList.toggle('on',!!custom);if(custom)pk.value=e.color}
+  ers.querySelectorAll('.acs').forEach(b=>b.style.background=st.accent)}
+const saveES=()=>{store.set('el',JSON.stringify(ES));store.set('sizes',JSON.stringify(Z))};
+ers.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.reset){const k=t.dataset.reset;Z[k]=1;if(ES[k])ES[k]={font:'',color:''}}
+  else if(t.dataset.col!==undefined)ES[t.dataset.k].color=t.dataset.col;else return;
+  saveES();paintES();req()});
+ers.addEventListener('input',e=>{const t=e.target;
+  if(t.dataset.font!==undefined){ES[t.dataset.font].font=t.value;loadFam(t.value).then(draw)}
+  else if(t.dataset.pick){ES[t.dataset.pick].color=t.value}
+  else if(t.dataset.k){Z[t.dataset.k]=t.value/100}else return;
+  saveES();paintES();req()});
+$('esReset').addEventListener('click',()=>{for(const k in Z)Z[k]=1;for(const k in ES)ES[k]={font:'',color:''};saveES();paintES();req();toast('Text styles reset')});
+
+// restore remembered style (text fields always start blank)
 for(const k of ['layout','size']){const v=store.get(k);if(v&&(k==='layout'?L[v]:SIZES[v])){st[k]=v;const r=document.querySelector(`input[name=${k}][value=${v}]`);if(r)r.checked=true}}
 {const a=store.get('accent');if(a&&/^#[0-9a-f]{6}$/i.test(a))st.accent=a;const lg=store.get('logo');if(lg)setLogo(lg,false)}
-paintSw();
-// text fields always start blank; only choices (distance, units, headline, pace) are remembered
-const TEXT=['name','time','prev','place','quote','race','date','km','custom','handle'];
+try{const z=JSON.parse(store.get('sizes')||'{}');for(const k in Z)if(z[k]>=.6&&z[k]<=1.6)Z[k]=z[k]}catch(e){}
+try{const es=JSON.parse(store.get('el')||'{}');for(const k in ES)if(es[k])ES[k]={font:FAM[es[k].font]?es[k].font:'',color:typeof es[k].color==='string'?es[k].color:''}}catch(e){}
 for(const id of TEXT){$(id).value='';$(id).dataset.d=''}
-for(const k of ['handle','f-race','f-date','f-km','f-custom'])store.set(k,null);
 const KEEP=['dist','unit','head'];
 for(const id of KEEP){const v=store.get('f-'+id);if(v!==null)$(id).value=v}
 {const v=store.get('f-pace');if(v!==null)$('pace').checked=v==='1'}
-$('customWrap').hidden=$('head').value!=='custom';$('kmWrap').hidden=$('dist').value!=='other';
+function syncForm(){$('customWrap').hidden=$('head').value!=='custom';$('kmWrap').hidden=$('dist').value!=='other';$('photoX').hidden=!img&&!photoBlob;
+  for(const id of ['time','prev'])$(id).dataset.d=$(id).value.replace(/\D/g,'');syncSample()}
+paintSw();paintES();
 
 $('f').addEventListener('input',e=>{const t=e.target;
   if(t.name==='layout'||t.name==='size'){st[t.name]=t.value;store.set(t.name,t.value)}
@@ -359,14 +538,19 @@ $('f').addEventListener('input',e=>{const t=e.target;
 $('f').addEventListener('change',()=>req());
 // number pads have no colon key: rebuild h:mm:ss from the digits typed
 const fmtDigits=g=>{g=g.replace(/^0+(?=\d{3})/,'');if(g.length<=2)return g;const s=g.slice(-2),m=g.slice(-4,-2),h=g.slice(0,-4);return h?`${+h}:${m}:${s}`:`${+m}:${s}`};
-for(const id of ['time','prev']){const el=$(id);el.dataset.d=el.value.replace(/\D/g,'');
+for(const id of ['time','prev']){const el=$(id);
   el.addEventListener('input',e=>{let g=el.value.replace(/\D/g,'').slice(0,6);
     if(e.inputType&&e.inputType.startsWith('delete')&&g===el.dataset.d)g=g.slice(0,-1);
     el.dataset.d=g;el.value=fmtDigits(g);req()},true)}
-$('photo').addEventListener('change',e=>readImg(e.target.files[0],im=>{img=im;px=py=0;$('zoom').value=1;req()}));
+// photos are drawn from the original and stored (downsized) with the draft
+function usePhoto(file){readImg(file,im=>{img=im;px=py=0;$('zoom').value=1;$('photoX').hidden=false;req();
+  const c=document.createElement('canvas'),k=Math.min(1,2560/Math.max(im.width,im.height));c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+  c.getContext('2d').drawImage(im,0,0,c.width,c.height);c.toBlob(b=>{if(img!==im)return;photoBlob=b;photoVer++;queueSave()},'image/jpeg',.9)})}
+$('photo').addEventListener('change',e=>usePhoto(e.target.files[0]));
+$('photoX').addEventListener('click',()=>{img=null;photoBlob=null;photoVer++;px=py=0;$('zoom').value=1;$('photo').value='';$('photoX').hidden=true;req()});
 $('logoIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>setLogo(r.result,true);r.readAsDataURL(f)});
 $('logoX').addEventListener('click',()=>{logo=null;store.set('logo',null);$('logoPrev').hidden=true;$('logoX').hidden=true;$('logoIn').value='';req()});
-$('next').addEventListener('click',()=>{for(const id of ['name','time','prev','place','quote'])$(id).value='';img=null;px=py=0;$('zoom').value=1;$('photo').value='';req();showTab('Athlete');$('name').focus();toast('Race details kept for the next athlete')});
+$('next').addEventListener('click',async()=>{await newPost(true);showTab('Athlete');$('name').focus();toast('Saved. Race details kept for the next athlete')});
 
 // drag to reposition
 let drag=null;
@@ -374,9 +558,11 @@ cv.addEventListener('pointerdown',e=>{if(!img)return;drag={x:e.clientX,y:e.clien
 cv.addEventListener('pointermove',e=>{if(!drag)return;const k=cv.width/cv.clientWidth;px=drag.px+(e.clientX-drag.x)*k;py=drag.py+(e.clientY-drag.y)*k;req()});
 const end=()=>{drag=null;cv.style.cursor=''};cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
 cv.addEventListener('click',()=>{if(!img)$('photo').click()});
+// drop a photo on the preview (desktop)
+for(const ev of ['dragenter','dragover'])cv.addEventListener(ev,e=>{e.preventDefault();cv.classList.add('drop')});
+for(const ev of ['dragleave','drop'])cv.addEventListener(ev,()=>cv.classList.remove('drop'));
+cv.addEventListener('drop',e=>{e.preventDefault();const f=[...(e.dataTransfer.files||[])].find(f=>f.type.startsWith('image/'));usePhoto(f)});
 
-// save
-const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 // sections as tabs: the preview stays put and only one section shows at a time
 const tabs=$('tabs'),panels=[...document.querySelectorAll('fieldset[data-tab]')];
 panels.forEach((f,i)=>{const n=f.dataset.tab,b=document.createElement('button');b.type='button';b.id='tab-'+i;b.textContent=n;b.dataset.t=n;b.setAttribute('role','tab');b.setAttribute('aria-controls','panel-'+i);
@@ -396,10 +582,13 @@ const vv=window.visualViewport,narrow=matchMedia('(max-width:899px)');
 function fitVV(){const r=document.documentElement.style;if(vv&&narrow.matches){r.setProperty('--vvh',vv.height+'px');r.setProperty('--vvt',vv.offsetTop+'px')}else{r.removeProperty('--vvh');r.removeProperty('--vvt')}}
 if(vv){vv.addEventListener('resize',fitVV);vv.addEventListener('scroll',fitVV)}
 narrow.addEventListener('change',fitVV);fitVV();
-$('f').addEventListener('focusin',e=>{if(narrow.matches&&e.target.matches('input,select,textarea'))setTimeout(()=>e.target.scrollIntoView({block:'nearest'}),350)});
+$('f').addEventListener('focusin',e=>{if(narrow.matches&&e.target.matches('input:not([type=range]),select,textarea'))setTimeout(()=>e.target.scrollIntoView({block:'nearest'}),350)});
+
+// save
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const touch=matchMedia('(pointer:coarse)').matches;
 $('save').textContent=touch&&navigator.canShare?'Save or share':'Save image';
-$('save').addEventListener('click',async()=>{draw();const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.93));if(!blob){toast('Could not create the image');return}
+$('save').addEventListener('click',async()=>{if(raf){cancelAnimationFrame(raf);draw()}saveNow();const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.93));if(!blob){toast('Could not create the image');return}
   const d=data(),fn=`${slug(d.name)||'athlete'}-${slug(d.race)||'race'}.jpg`,file=new File([blob],fn,{type:'image/jpeg'});
   // phone: the share sheet offers Save Image and Instagram directly
   if(touch&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]});return}catch(e){if(e&&e.name==='AbortError')return}}
@@ -408,34 +597,10 @@ $('save').addEventListener('click',async()=>{draw();const blob=await new Promise
   $('ovImg').src=URL.createObjectURL(blob);$('ov').classList.add('on');$('ovX').focus()});
 $('ovX').addEventListener('click',()=>$('ov').classList.remove('on'));
 $('ov').addEventListener('click',e=>{if(e.target.id==='ov')$('ov').classList.remove('on')});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')$('ov').classList.remove('on')});
-// drop a photo on the preview (desktop)
-for(const ev of ['dragenter','dragover'])cv.addEventListener(ev,e=>{e.preventDefault();cv.classList.add('drop')});
-for(const ev of ['dragleave','drop'])cv.addEventListener(ev,()=>cv.classList.remove('drop'));
-cv.addEventListener('drop',e=>{e.preventDefault();const f=[...(e.dataTransfer.files||[])].find(f=>f.type.startsWith('image/'));readImg(f,im=>{img=im;px=py=0;$('zoom').value=1;req()})});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('ov').classList.remove('on');closeDrawer()}});
 
-// font picker
-const loadF=p=>document.fonts?Promise.all([`${p.tw} 100px ${p.t}`,`${p.nw} 40px ${p.n}`,`400 30px ${p.x}`,`500 30px ${p.x}`,`600 30px ${p.x}`,`italic 400 30px ${p.x}`].map(f=>document.fonts.load(f).catch(()=>{}))):Promise.resolve();
-const fb=$('fonts');
-for(const [id,f] of Object.entries(FONTS)){const b=document.createElement('button');b.type='button';b.dataset.f=id;b.setAttribute('role','radio');
-  const sp=document.createElement('span');sp.className='ft';sp.style.fontFamily=f.t;sp.style.fontWeight=f.tw;sp.textContent='1:19:42';
-  const sm=document.createElement('small');sm.textContent=f.label;b.append(sp,sm);fb.append(b)}
-const paintF=()=>fb.querySelectorAll('button').forEach(b=>{const on=FONTS[b.dataset.f]===P;b.setAttribute('aria-pressed',on);b.setAttribute('aria-checked',on)});
-const setFont=id=>{if(!FONTS[id])return;P=FONTS[id];T=P.x;paintF();req();loadF(P).then(draw)};
-fb.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;store.set('font',b.dataset.f);setFont(b.dataset.f)});
-const syncSample=()=>{const t=$('time').value.trim()||'1:19:42';fb.querySelectorAll('.ft').forEach(x=>x.textContent=t)};
-$('time').addEventListener('input',syncSample);
-setFont(store.get('font')||'clean');syncSample();
-// element sizes
-const szb=$('sizes');
-try{const z=JSON.parse(store.get('sizes')||'{}');for(const k in Z)if(z[k]>=.6&&z[k]<=1.6)Z[k]=z[k]}catch(e){}
-for(const [k,l] of ZK){const r=document.createElement('div');r.className='sz';
-  const lb=document.createElement('label');lb.htmlFor='z-'+k;lb.textContent=l;
-  const i=document.createElement('input');i.type='range';i.id='z-'+k;i.min=60;i.max=160;i.step=5;i.value=Math.round(Z[k]*100);i.dataset.k=k;
-  const o=document.createElement('output');o.id='o-'+k;o.textContent=i.value+'%';r.append(lb,i,o);szb.append(r)}
-szb.addEventListener('input',e=>{const i=e.target;if(!i.dataset.k)return;Z[i.dataset.k]=i.value/100;$('o-'+i.dataset.k).textContent=i.value+'%';store.set('sizes',JSON.stringify(Z));req()});
-$('szReset').addEventListener('click',()=>{for(const [k] of ZK){Z[k]=1;$('z-'+k).value=100;$('o-'+k).textContent='100%'}store.set('sizes',null);req()});
-draw();
+setFont(store.get('font')||'clean');syncForm();loadUsed();
+lastSnap=JSON.stringify(snap());draw();
 if(document.fonts)document.fonts.ready.then(draw);
 }
 </script>
