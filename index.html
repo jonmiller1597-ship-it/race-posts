@@ -35,23 +35,17 @@ h1{font:500 clamp(32px,4.6vw,46px)/1.05 "Inter Tight",Arial,sans-serif;margin:0;
 header p{margin:6px 0 0;color:var(--mut);max-width:62ch}
 main{max-width:1240px;margin:0 auto;display:grid;gap:28px;padding:16px max(4vw,16px,env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) max(4vw,16px,env(safe-area-inset-left))}
 #cv.drop{outline:4px dashed var(--red);outline-offset:4px}
-main{grid-template-areas:"stage" "tabs" "panel"}
-.stage{grid-area:stage}.tabs{grid-area:tabs}form{grid-area:panel}
-@media(min-width:900px){main{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:auto 1fr;grid-template-areas:"stage tabs" "stage panel";align-items:start;row-gap:16px}.stage{position:sticky;top:16px}}
-.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px}
-.tabs::-webkit-scrollbar{display:none}
-.tabs button{flex:1 0 auto;min-height:42px;padding:8px 14px;font-size:15px}
-.tabs button[aria-selected=true]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+main{grid-template-areas:"stage" "bar" "panel"}
+.stage{grid-area:stage;position:relative}.bar{grid-area:bar}form{grid-area:panel}
+@media(min-width:900px){main{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:auto 1fr;grid-template-areas:"stage bar" "stage panel";align-items:start;row-gap:16px}.stage{position:sticky;top:16px}}
 fieldset legend{display:none}
 .stage{display:grid;gap:14px;justify-items:center}
 #cv{display:block;width:auto;height:auto;max-width:min(100%,560px);max-height:76svh;border-radius:6px;background:#2a2a2a;box-shadow:0 14px 34px rgba(0,0,0,.22);touch-action:none;cursor:grab}
-.acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
 button,.file span{font:600 16px "Inter Tight",Arial,sans-serif;min-height:46px;padding:10px 20px;border-radius:999px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
 button:hover,.file:hover span{border-color:var(--ink)}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.file input:focus-visible+span{outline:3px solid var(--red);outline-offset:2px}
 button.primary{background:var(--red);border-color:var(--red);color:var(--onred)}
 button.primary:hover{filter:brightness(1.08)}
-.hint{margin:0;color:var(--mut);font-size:14px;text-align:center}
 form{display:grid;gap:18px}
 fieldset{border:1px solid var(--line);background:var(--pan);border-radius:10px;padding:18px;margin:0;display:grid;gap:14px}
 legend{font:600 17px "Inter Tight",Arial,sans-serif;padding:0 6px}
@@ -83,7 +77,6 @@ input[type=range]{width:100%;accent-color:var(--red);height:44px}
 .fonts button{display:grid;gap:4px;justify-items:center;padding:12px 6px 10px;border-radius:10px;font-size:28px;line-height:1.05;min-height:76px;white-space:nowrap;overflow:hidden}
 .fonts button small{font:500 13px "Inter Tight",Arial,sans-serif;color:var(--mut)}
 .fonts button[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
-.szs{display:grid;gap:2px}
 .sz{display:grid;grid-template-columns:8.5em minmax(0,1fr) 3.4em;align-items:center;gap:10px}
 .sz output{text-align:right;font-variant-numeric:tabular-nums;color:var(--mut);font-weight:600}
 .lrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -100,12 +93,8 @@ html,body{height:100%;overflow:hidden}
 header{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 main{position:fixed;left:0;right:0;top:0;height:var(--vvh,100dvh);transform:translateY(var(--vvt,0px));grid-template-rows:auto auto minmax(0,1fr);gap:10px;padding:calc(10px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
 .stage{gap:8px}
-#cv{max-height:calc(var(--vvh,100dvh) * .5 - 56px);box-shadow:0 6px 18px rgba(0,0,0,.2)}
-.hint{display:none}
-.tabs{gap:4px}.tabs button{flex:1 1 0;padding:7px 2px;font-size:14px;min-height:40px}
-.acts button{min-height:40px;padding:7px 18px;font-size:15px}
+#cv{max-height:calc(var(--vvh,100dvh) * .5 - 18px);box-shadow:0 6px 18px rgba(0,0,0,.2)}
 form{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
-.acts .icon{width:46px;padding:0}
 }
 .icon{display:inline-grid;place-items:center;width:46px;padding:0}
 .icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
@@ -126,93 +115,130 @@ form{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(
 .dr small{display:block;color:var(--mut);font-weight:500;font-size:13px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dr .del{min-height:38px;padding:6px 12px;font-size:14px}
 .empty{color:var(--mut);margin:4px 2px}
-/* per-element text styles */
-.ers{display:grid;gap:10px}
-.er{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
-.erh{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:36px}
-.erh b{font-size:16px}
-.mini{min-height:36px;padding:4px 14px;font-size:14px}
-.erc{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.erc select{flex:1 1 170px;width:auto!important}
-.cols{display:flex;gap:7px;align-items:center}
+/* toolbar: drafts, section tabs, save */
+.bar{display:flex;align-items:center;gap:8px}
+.bar .icon{flex:none;width:44px;min-height:44px}
+.bar #save{flex:none;padding:10px 18px}
+.tabs{flex:1;display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--pan);border:1px solid var(--line)}
+.tabs button{flex:1 1 0;min-height:38px;padding:6px 4px;border:0;background:none;font-size:15px}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--bg)}
+/* compact form */
+form label{font-size:13px;gap:4px;color:var(--mut)}
+form label small{font-size:12px}
+input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]),select,textarea{min-height:42px;padding:8px 11px}
+textarea{min-height:64px}
+.fg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
+.fg .full{grid-column:1/-1}
+.tip{margin:0;color:var(--mut);font-size:13px}
+.prow{display:flex;align-items:center;gap:10px}
+.prow .file span,.prow button{min-height:40px;padding:6px 16px;font-size:15px;white-space:nowrap}
+.prow .zl{display:flex;flex:1;align-items:center;gap:8px;font-size:13px}
+.prow input[type=range]{flex:1;height:40px}
+.chk{min-height:40px;font-size:15px;color:var(--ink)}
+.wide{width:100%}
+.lbl{font-size:13px;color:var(--mut);margin-bottom:5px}
+.seg span{padding:9px 6px;min-height:40px;font-size:14px}
+.fonts button{min-height:58px;padding:8px 4px 6px;font-size:21px;border-radius:8px}
+.fonts button small{font-size:12px}
+.sw button{width:38px;height:38px}
+.sw input[type=color]{height:38px}
+/* the preview: tap targets and the selected-line outline */
+#sel{position:absolute;pointer-events:none;border:2px solid #fff;border-radius:5px;box-shadow:0 0 0 1.5px rgba(0,0,0,.55),inset 0 0 0 1px rgba(0,0,0,.35)}
+input.flash,select.flash,textarea.flash{animation:flash 1s ease}
+@keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--red)}100%{box-shadow:0 0 0 0 transparent}}
+/* text tab: pick a line, then one compact editor */
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;min-height:36px;padding:5px 13px;font-size:14px}
+.chips button[aria-checked=true]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.erow{display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:10px}
+.erow.sz{grid-template-columns:52px minmax(0,1fr) 3.2em}
+.erow .lab{font-size:13px;font-weight:600;color:var(--mut)}
+.erow output{text-align:right;font-variant-numeric:tabular-nums;color:var(--mut);font-weight:600;font-size:14px}
+.cols{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
 .cols button{width:36px;height:36px;min-height:0;padding:0;border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 0 1.5px var(--line);font:700 11px "Inter Tight",Arial,sans-serif}
 .cols button[aria-pressed=true]{box-shadow:0 0 0 3px var(--ink)}
 .cols .auto{background:var(--pan);color:var(--ink)}
 .cols input[type=color]{width:42px;height:38px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);padding:3px;cursor:pointer}
 .cols input.on{box-shadow:0 0 0 3px var(--ink)}
-.er .sz{grid-template-columns:3em minmax(0,1fr) 3.4em}
-.er .sz label{font-weight:500;color:var(--mut)}
+.note{margin:0;font-size:13px;color:var(--mut)}
+.mini{min-height:36px;padding:4px 14px;font-size:14px}
+@media(max-width:899px){
+fieldset{border:0;background:none;padding:2px 0 0;gap:12px}
+.bar #save{padding:10px 16px}
+}
 @media(prefers-reduced-motion:reduce){#toast,#drawer,#scrim{transition:none}}
 </style>
 </head>
 <body>
 <header>
 <h1>Race result post maker</h1>
-<p>Add a photo, the race and the finish time, then save a 1080px image ready for Instagram. Posts save as drafts while you work; open them from the menu.</p>
+<p>Add a photo and the result, then save a 1080px image for Instagram. Tap any line on the post to edit it. Drafts save as you work; open them from the menu.</p>
 </header>
 <main id="app">
 <section class="stage" aria-label="Preview">
-<canvas id="cv" width="1080" height="1350" aria-label="Post preview"></canvas>
-<p class="hint">Drag the photo to reposition it. Tap the preview, or drop a file on it, to add a photo.</p>
-<div class="acts"><button type="button" id="menu" class="icon" aria-label="Drafts" aria-controls="drawer" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><button type="button" id="save" class="primary">Save image</button><button type="button" id="next">Next athlete</button></div>
+<canvas id="cv" width="1080" height="1350" aria-label="Post preview. Tap a line to edit it; drag or pinch to adjust the photo."></canvas>
+<div id="sel" hidden></div>
 </section>
+<div class="bar">
+<button type="button" id="menu" class="icon" aria-label="Drafts" aria-controls="drawer" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
 <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
+<button type="button" id="save" class="primary">Save</button>
+</div>
 
 <form id="f" autocomplete="off" onsubmit="return false">
-<fieldset data-tab="Photo"><legend>Photo</legend>
-<div class="inl"><label class="file"><input type="file" id="photo" accept="image/*"><span>Choose athlete photo</span></label><button type="button" id="photoX" hidden>Remove photo</button></div>
-<label for="zoom">Zoom<input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></label>
-</fieldset>
-
-<fieldset data-tab="Athlete"><legend>Athlete and result</legend>
-<div class="g2">
-<label>Athlete name<input id="name" placeholder="Athlete name"></label>
+<fieldset data-tab="Details"><legend>Details</legend>
+<p class="tip">Tap any line on the post to edit it. Drag or pinch the photo to frame it.</p>
+<div class="prow"><label class="file"><input type="file" id="photo" accept="image/*"><span id="photoL">Add photo</span></label><button type="button" id="photoX" hidden>Remove</button>
+<label class="zl" for="zoom">Zoom<input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></label></div>
+<div class="fg">
+<label class="full">Athlete name<input id="name" placeholder="Athlete name"></label>
+<label>Finish time<input id="time" placeholder="1:19:42" inputmode="numeric"></label>
+<label><span>Previous best <small>optional</small></span><input id="prev" placeholder="1:21:15" inputmode="numeric"></label>
 <label>Headline<select id="head">
 <option>Personal best</option><option>Debut</option><option>Course best</option><option>Age-group podium</option><option>Boston qualifier</option><option>Negative split</option><option>Finisher</option><option value="custom">Custom…</option>
 </select></label>
 <label id="customWrap" hidden>Custom headline<input id="custom" placeholder="First sub-3"></label>
-<label><span>Finish time <small>type digits, colons fill in</small></span><input id="time" placeholder="1:19:42" inputmode="numeric"></label>
-<label><span>Previous best <small>optional</small></span><input id="prev" placeholder="1:21:15" inputmode="numeric"></label>
-<label><span>Place <small>optional</small></span><input id="place" placeholder="14th overall, 3rd F30-34"></label>
-</div>
-<label><span>Quote <small>optional</small></span><textarea id="quote" rows="2" placeholder="A line from the athlete"></textarea></label>
-</fieldset>
-
-<fieldset data-tab="Race"><legend>Race</legend>
-<div class="g2">
-<label>Race name<input id="race" placeholder="Philadelphia Half Marathon"></label>
+<label><span>Place <small>optional</small></span><input id="place" placeholder="3rd F30-34"></label>
+<label class="full">Race name<input id="race" placeholder="Philadelphia Half Marathon"></label>
 <label>Date<input type="date" id="date"></label>
 <label>Distance<select id="dist">
 <option value="5k">5K</option><option value="10k">10K</option><option value="10mi">10 mile</option><option value="half" selected>Half marathon</option><option value="full">Marathon</option><option value="other">Other</option>
 </select></label>
 <label id="kmWrap" hidden>Distance in km<input id="km" inputmode="decimal" placeholder="15"></label>
-</div>
-<div class="inl"><label class="chk"><input type="checkbox" id="pace">Show pace</label>
+<div class="full inl"><label class="chk"><input type="checkbox" id="pace">Show pace</label>
 <select id="unit" aria-label="Pace unit" style="width:auto"><option value="mi">per mile</option><option value="km">per km</option></select></div>
+<label class="full"><span>Quote <small>optional</small></span><textarea id="quote" rows="2" placeholder="A line from the athlete"></textarea></label>
+</div>
+<button type="button" id="next" class="wide">Next athlete (keeps race details)</button>
 </fieldset>
 
 <fieldset data-tab="Style"><legend>Style</legend>
-<div class="seg" role="radiogroup" aria-label="Layout">
+<div><div class="lbl">Layout</div><div class="seg" role="radiogroup" aria-label="Layout">
 <label><input type="radio" name="layout" value="overlay" checked><span>Overlay</span></label>
 <label><input type="radio" name="layout" value="print"><span>Print</span></label>
 <label><input type="radio" name="layout" value="split"><span>Split</span></label>
-</div>
-<div class="seg" role="radiogroup" aria-label="Size">
+</div></div>
+<div><div class="lbl">Size</div><div class="seg" role="radiogroup" aria-label="Size">
 <label><input type="radio" name="size" value="post" checked><span>Post 4:5</span></label>
 <label><input type="radio" name="size" value="square"><span>Square</span></label>
 <label><input type="radio" name="size" value="story"><span>Story 9:16</span></label>
-</div>
+</div></div>
 <div><div class="lbl">Post font</div><div class="fonts" id="fonts" role="radiogroup" aria-label="Post font"></div></div>
-<div><div class="lbl">Accent colour</div>
-<div class="sw" id="sw"></div></div>
-<div class="lrow"><label class="file"><input type="file" id="logoIn" accept="image/*"><span>Add team logo</span></label><img id="logoPrev" alt="Logo preview" hidden><button type="button" id="logoX" hidden>Remove logo</button></div>
+<div><div class="lbl">Accent colour</div><div class="sw" id="sw"></div></div>
+<div class="fg">
 <label>Your handle<input id="handle" placeholder="@yourhandle"></label>
+<div><div class="lbl">Team logo</div><div class="lrow"><label class="file"><input type="file" id="logoIn" accept="image/*"><span>Add logo</span></label><img id="logoPrev" alt="Logo preview" hidden><button type="button" id="logoX" class="mini" hidden>Remove</button></div></div>
+</div>
 </fieldset>
 
 <fieldset data-tab="Text"><legend>Text styles</legend>
-<p class="hint" style="text-align:left;display:block">Set a font, colour and size for each line. Default follows the post font and layout.</p>
-<div class="ers" id="ers"></div>
-<div><button type="button" id="esReset">Reset all text styles</button></div>
+<div class="chips" id="chips" role="radiogroup" aria-label="Line to style"></div>
+<p class="note" id="enote" hidden></p>
+<div class="erow" id="erowF"><label class="lab" for="efont">Font</label><select id="efont"></select></div>
+<div class="erow" id="erowC"><span class="lab">Colour</span><div class="cols" id="ecols" role="group" aria-label="Colour"></div></div>
+<div class="erow sz"><label class="lab" for="ez">Size</label><input type="range" id="ez" min="60" max="160" step="5"><output id="eo" for="ez"></output></div>
+<div class="inl"><button type="button" id="eReset" class="mini">Reset this line</button><button type="button" id="esReset" class="mini">Reset all lines</button></div>
 </fieldset>
 </form>
 </main>
@@ -260,7 +286,7 @@ const MI={'5k':3.10686,'10k':6.21371,'10mi':10,'half':13.1094,'full':26.2188};
 const DN={'5k':'5K','10k':'10K','10mi':'10 Mile','half':'Half Marathon','full':'Marathon'};
 const SW=['#4cc3ea','#e2482d','#d7f23b','#2457ff','#ff8a1f','#16a36b'];
 const st={layout:'overlay',size:'post',accent:SW[0],font:'clean'};
-let W=1080,H=1350,img=null,logo=null,px=0,py=0,raf=0,ACC='#fff';
+let W=1080,H=1350,img=null,logo=null,px=0,py=0,raf=0,ACC='#fff',curTab='';
 const store={get(k){try{return localStorage.getItem('rrp-'+k)}catch(e){return null}},set(k,v){try{v==null?localStorage.removeItem('rrp-'+k):localStorage.setItem('rrp-'+k,v)}catch(e){}}};
 
 const parseT=s=>{const p=String(s).trim().split(':').map(Number);if(p.length<2||p.some(n=>isNaN(n)))return null;return p.reduce((a,n)=>a*60+n,0)};
@@ -298,6 +324,10 @@ const sc=(k,role=1)=>el(k,role).sc;
 // element colour: override if set ('accent' follows the accent), otherwise the layout's colour
 const C=(k,def)=>{const c=ES[k]&&ES[k].color;return !c?def:c==='accent'?ACC:c};
 const F=(w,s,f)=>{ctx.font=`${w} ${s}px ${f||T}`};
+// bounding box of every line as drawn, in canvas pixels (for tap-to-edit and the selection outline)
+let BX={};
+function mark(k,x,y,w,h){const b=BX[k];if(!b){BX[k]={x,y,w,h};return}const x0=Math.min(b.x,x),y0=Math.min(b.y,y);BX[k]={x:x0,y:y0,w:Math.max(b.x+b.w,x+w)-x0,h:Math.max(b.y+b.h,y+h)-y0}}
+const markT=(k,x,base,s,w)=>mark(k,x,base-s*.8,w,s*1.02);
 function fitE(k,t,maxW,max,min,role=1){const c=sc(k,role);let s=Math.round(max*c);const mn=Math.round(min*c);SF(k,s,role);while(s>mn&&ctx.measureText(t).width>maxW){s-=2;SF(k,s,role)}return s}
 function wrap(t,maxW,max){const L=[];let cur='';for(const w of t.split(/\s+/)){const x=cur?cur+' '+w:w;if(cur&&ctx.measureText(x).width>maxW){L.push(cur);cur=w}else cur=x}if(cur)L.push(cur);if(L.length>max){L.length=max;let l=L[max-1];while(l&&ctx.measureText(l+'…').width>maxW)l=l.slice(0,-1);L[max-1]=l.trimEnd()+'…'}return L}
 function shade(y0,y1,a0,a1){const g=ctx.createLinearGradient(0,y0,0,y1);g.addColorStop(0,`rgba(0,0,0,${a0})`);g.addColorStop(1,`rgba(0,0,0,${a1})`);ctx.fillStyle=g;ctx.fillRect(0,y0,W,y1-y0)}
@@ -307,7 +337,7 @@ function photo(x,y,w,h){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
   else{const g=ctx.createLinearGradient(x,y,x,y+h);g.addColorStop(0,'#a9a59d');g.addColorStop(1,'#6f6b64');ctx.fillStyle=g;ctx.fillRect(x,y,w,h);
     F(500,30);ctx.fillStyle='rgba(255,255,255,.85)';ctx.textAlign='center';ctx.fillText('Add a photo of your athlete',x+w/2,y+h*.38);ctx.textAlign='left'}
   ctx.restore()}
-function drawLogo(x,y,s,right){if(!logo)return;const k=Math.min(s/logo.width,s/logo.height),w=logo.width*k,h=logo.height*k;ctx.drawImage(logo,right?x-w:x,y,w,h)}
+function drawLogo(x,y,s,right){if(!logo)return;const k=Math.min(s/logo.width,s/logo.height),w=logo.width*k,h=logo.height*k;ctx.drawImage(logo,right?x-w:x,y,w,h);mark('logo',right?x-w:x,y,w,h)}
 const stats=d=>[d.place,d.pace].filter(Boolean);
 // old time struck through -> new time, then the gain
 function progW(d,s){SF('prog',s,1);const a=ctx.measureText(d.prev).width;SF('prog',s,2);return a+s*2.1+ctx.measureText(d.time).width+s*1.1+ctx.measureText(d.gain).width}
@@ -316,31 +346,33 @@ function prog(d,x,y,s,col,mut,acc,maxW){const oc=ES.prog.color;if(oc){col=C('pro
   ctx.save();if(oc)ctx.globalAlpha*=.6;
   SF('prog',s,1);ctx.fillStyle=mut;ctx.fillText(d.prev,x,y);const a=ctx.measureText(d.prev).width;ctx.fillRect(x-3,mid-lw/2,a+6,lw);
   let cx=x+a+g;ctx.strokeStyle=mut;ctx.lineWidth=lw;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(cx,mid);ctx.lineTo(cx+al,mid);ctx.moveTo(cx+al-s*.3,mid-s*.27);ctx.lineTo(cx+al,mid);ctx.lineTo(cx+al-s*.3,mid+s*.27);ctx.stroke();ctx.restore();
-  cx+=al+g;SF('prog',s,2);ctx.fillStyle=col;ctx.fillText(d.time,cx,y);cx+=ctx.measureText(d.time).width+s*1.1;ctx.fillStyle=acc;ctx.fillText(d.gain,cx,y)}
-function row(arr,x,y,size,col,maxW){const tot=s=>{SF('stats',s);return arr.reduce((a,t)=>a+ctx.measureText(t).width,0)+s*1.2*(arr.length-1)};while(maxW&&size>12&&tot(size)>maxW)size-=1;SF('stats',size);const gap=size*1.2;let cx=x;ctx.fillStyle=col;for(const t of arr){ctx.fillText(t,cx,y);cx+=ctx.measureText(t).width+gap}}
+  cx+=al+g;SF('prog',s,2);ctx.fillStyle=col;ctx.fillText(d.time,cx,y);cx+=ctx.measureText(d.time).width+s*1.1;ctx.fillStyle=acc;ctx.fillText(d.gain,cx,y);markT('prog',x,y,s,cx+ctx.measureText(d.gain).width-x)}
+function row(arr,x,y,size,col,maxW){const tot=s=>{SF('stats',s);return arr.reduce((a,t)=>a+ctx.measureText(t).width,0)+s*1.2*(arr.length-1)};while(maxW&&size>12&&tot(size)>maxW)size-=1;SF('stats',size);const gap=size*1.2;let cx=x;ctx.fillStyle=col;for(const t of arr){ctx.fillText(t,cx,y);cx+=ctx.measureText(t).width+gap}markT('stats',x,y,size,cx-gap-x)}
 const CW=.3;
 const TF=(s)=>{const e=el('time',0);ctx.font=`${e.w} ${s}px ${e.f}`;return e};
 function asc(s){TF(s);return ctx.measureText('0').actualBoundingBoxAscent||s*.73}
 function timeW(t,s){const e=TF(s);if(!e.dots)return ctx.measureText(t).width;let w=0;for(const ch of t)w+=ch===':'?s*CW:ctx.measureText(ch).width;return w}
 function fitTime(t,maxW,max,min){let s=max;while(s>min&&timeW(t,s)>maxW)s-=2;return s}
-function drawTime(t,x,y,s){const a=asc(s),e=TF(s);if(!e.dots){ctx.fillText(t,x,y);return}let cx=x;const r=s*.045;for(const ch of t){if(ch===':'){const c=cx+s*CW/2;for(const dy of [r+s*.01,a*.71]){ctx.beginPath();ctx.arc(c,y-dy,r,0,7);ctx.fill()}cx+=s*CW}else{ctx.fillText(ch,cx,y);cx+=ctx.measureText(ch).width}}}
+function drawTime(t,x,y,s){const a=asc(s);mark('time',x,y-a,timeW(t,s),a);const e=TF(s);if(!e.dots){ctx.fillText(t,x,y);return}let cx=x;const r=s*.045;for(const ch of t){if(ch===':'){const c=cx+s*CW/2;for(const dy of [r+s*.01,a*.71]){ctx.beginPath();ctx.arc(c,y-dy,r,0,7);ctx.fill()}cx+=s*CW}else{ctx.fillText(ch,cx,y);cx+=ctx.measureText(ch).width}}}
 const story=()=>st.size==='story';
+function txt(k,t,x,y,s){ctx.fillText(t,x,y);markT(k,x,y,s,ctx.measureText(t).width)}
+function txtR(k,t,x,y,s){const w=ctx.measureText(t).width;ctx.fillText(t,x-w,y);markT(k,x-w,y,s,w)}
 
 function overlay(d){
   const pd=72,sm=story()?250:76,top=story()?200:64,acc=lite(st.accent),sts=stats(d),rl=[d.race,d.meta].filter(Boolean).join('  /  ');ACC=acc;
   const hs=26*Z.head*sc('head',2),hds=24*Z.handle*sc('handle'),ss=26*Z.stats*sc('stats'),qs=30*Z.quote*sc('quote');
   photo(0,0,W,H);shade(H*.38,H,0,.78);if(logo||d.handle)shade(0,H*.22,.3,0);
   drawLogo(pd,top,90*Z.logo,false);
-  if(d.handle){SF('handle',hds);ctx.fillStyle=C('handle','rgba(255,255,255,.85)');ctx.textAlign='right';ctx.fillText(d.handle,W-pd,top+hds*1.2);ctx.textAlign='left'}
+  if(d.handle){SF('handle',hds);ctx.fillStyle=C('handle','rgba(255,255,255,.85)');txtR('handle',d.handle,W-pd,top+hds*1.2,hds)}
   ctx.save();ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=12;
   let y=H-sm;const rs=fitE('race',rl,W-pd*2,28*Z.race,14);
   if(sts.length){row(sts,pd,y,ss,C('stats','rgba(255,255,255,.8)'),W-pd*2);y-=ss*.75+24+rs*.25}
-  SF('race',rs);ctx.fillStyle=C('race','rgba(255,255,255,.78)');ctx.fillText(rl,pd,y);
-  const ns=fitE('name',d.name,W-pd*2,44*Z.name,18,2);y-=rs*.75+22+ns*.25;ctx.fillStyle=C('name','#fff');ctx.fillText(d.name,pd,y);
+  SF('race',rs);ctx.fillStyle=C('race','rgba(255,255,255,.78)');txt('race',rl,pd,y,rs);
+  const ns=fitE('name',d.name,W-pd*2,44*Z.name,18,2);y-=rs*.75+22+ns*.25;ctx.fillStyle=C('name','#fff');txt('name',d.name,pd,y,ns);
   const ps=30*Z.prog*sc('prog');if(d.prev){y-=ns*.75+22+ps*.25;prog(d,pd,y,ps,'#fff','rgba(255,255,255,.62)',acc,W-pd*2);y-=ps*.75+24}else y-=ns*.75+26;
   const ts=fitTime(d.time,W-pd*2,220*Z.time,50);ctx.fillStyle=C('time','#fff');drawTime(d.time,pd,y,ts);y-=asc(ts)+40;
-  if(d.head){y-=hs*.25;SF('head',hs,2);ctx.fillStyle=C('head',acc);ctx.fillText(d.head,pd,y);y-=hs*.75+26}
-  if(d.quote){SF('quote',qs);const Q=wrap(d.quote,W-pd*2-120,3);y-=qs*.25;ctx.fillStyle=C('quote','rgba(255,255,255,.9)');Q.forEach((l,i)=>ctx.fillText(l,pd,y-(Q.length-1-i)*qs*1.4))}
+  if(d.head){y-=hs*.25;SF('head',hs,2);ctx.fillStyle=C('head',acc);txt('head',d.head,pd,y,hs);y-=hs*.75+26}
+  if(d.quote){SF('quote',qs);const Q=wrap(d.quote,W-pd*2-120,3);y-=qs*.25;ctx.fillStyle=C('quote','rgba(255,255,255,.9)');Q.forEach((l,i)=>txt('quote',l,pd,y-(Q.length-1-i)*qs*1.4,qs))}
   ctx.restore();
 }
 
@@ -358,13 +390,13 @@ function print(d){
   const th=o+last*.25+(d.handle?hds+52:36),pb=H-sb-th;
   photo(m,mt,iw,pb-mt);
   ctx.fillStyle=C('time',ink);drawTime(d.time,W-m-tw,pb+yT,ts);
-  if(d.head){SF('head',hs,2);ctx.fillStyle=C('head',acc);ctx.fillText(d.head,m,pb+yT-ns*.75-18)}
-  SF('name',ns,2);ctx.fillStyle=C('name',ink);ctx.fillText(d.name,m,pb+yT);
+  if(d.head){SF('head',hs,2);ctx.fillStyle=C('head',acc);txt('head',d.head,m,pb+yT-ns*.75-18,hs)}
+  SF('name',ns,2);ctx.fillStyle=C('name',ink);txt('name',d.name,m,pb+yT,ns);
   if(yP)prog(d,m,pb+yP,ps,ink,grey,acc,iw);
-  SF('race',rs);ctx.fillStyle=C('race',grey);ctx.fillText(rl,m,pb+yR);
+  SF('race',rs);ctx.fillStyle=C('race',grey);txt('race',rl,m,pb+yR,rs);
   if(yS)row(sts,m,pb+yS,ss,C('stats',grey),iw);
-  if(Q.length){SF('quote',qs);ctx.fillStyle=C('quote',grey);Q.forEach((l,i)=>ctx.fillText(l,m,pb+yQ[i]))}
-  if(d.handle){SF('handle',hds);ctx.fillStyle=C('handle',grey);ctx.textAlign='right';ctx.fillText(d.handle,W-m,H-sb-28);ctx.textAlign='left'}
+  if(Q.length){SF('quote',qs);ctx.fillStyle=C('quote',grey);Q.forEach((l,i)=>txt('quote',l,m,pb+yQ[i],qs))}
+  if(d.handle){SF('handle',hds);ctx.fillStyle=C('handle',grey);txtR('handle',d.handle,W-m,H-sb-28,hds)}
   drawLogo(W-m-28,mt+28,84*Z.logo,true);
 }
 
@@ -381,19 +413,19 @@ function split(d){
   const ph=o+last*.25+56+sb,top=H-ph;
   photo(0,0,W,top+1);drawLogo(W-pd,story()?200:pd-16,90*Z.logo,true);
   ctx.fillStyle='#121212';ctx.fillRect(0,top,W,ph);
-  if(d.head){SF('head',hs,2);ctx.fillStyle=C('head',acc);ctx.fillText(d.head,pd,top+yH)}
-  if(d.handle){SF('handle',hds);ctx.fillStyle=C('handle','rgba(255,255,255,.55)');ctx.textAlign='right';ctx.fillText(d.handle,W-pd,top+yH);ctx.textAlign='left'}
+  if(d.head){SF('head',hs,2);ctx.fillStyle=C('head',acc);txt('head',d.head,pd,top+yH,hs)}
+  if(d.handle){SF('handle',hds);ctx.fillStyle=C('handle','rgba(255,255,255,.55)');txtR('handle',d.handle,W-pd,top+yH,hds)}
   ctx.fillStyle=C('time','#fff');drawTime(d.time,pd,top+yT,ts);
   if(yP)prog(d,pd,top+yP,ps,'#fff','rgba(255,255,255,.5)',acc,W-pd*2);
-  SF('name',ns,2);ctx.fillStyle=C('name','#fff');ctx.fillText(d.name,pd,top+yN);
-  SF('race',rs);ctx.fillStyle=C('race','rgba(255,255,255,.6)');ctx.fillText(rl,pd,top+yR);
+  SF('name',ns,2);ctx.fillStyle=C('name','#fff');txt('name',d.name,pd,top+yN,ns);
+  SF('race',rs);ctx.fillStyle=C('race','rgba(255,255,255,.6)');txt('race',rl,pd,top+yR,rs);
   if(yS)row(sts,pd,top+yS,ss,C('stats','rgba(255,255,255,.75)'),W-pd*2);
-  if(Q.length){SF('quote',qs);ctx.fillStyle=C('quote','rgba(255,255,255,.8)');Q.forEach((l,i)=>ctx.fillText(l,pd,top+yQ[i]))}
+  if(Q.length){SF('quote',qs);ctx.fillStyle=C('quote','rgba(255,255,255,.8)');Q.forEach((l,i)=>txt('quote',l,pd,top+yQ[i],qs))}
 }
 
 const L={overlay,print,split};
 function draw(){raf=0;const [w,h]=SIZES[st.size];if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}W=w;H=h;
-  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.globalAlpha=1;L[st.layout](data())}
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.globalAlpha=1;BX={};L[st.layout](data());placeSel()}
 const req=()=>{if(!raf)raf=requestAnimationFrame(draw);queueSave()};
 
 let tt=0;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200)}
@@ -455,7 +487,7 @@ let lastFocus=null;
 async function openDrawer(){await saveNow();lastFocus=document.activeElement;renderList();$('drawer').classList.add('on');$('scrim').classList.add('on');$('app').inert=true;$('menu').setAttribute('aria-expanded','true');setTimeout(()=>$('dClose').focus(),50)}
 function closeDrawer(){if(!$('drawer').classList.contains('on'))return;$('drawer').classList.remove('on');$('scrim').classList.remove('on');$('app').inert=false;$('menu').setAttribute('aria-expanded','false');if(lastFocus&&lastFocus.focus)lastFocus.focus()}
 $('menu').addEventListener('click',openDrawer);$('dClose').addEventListener('click',closeDrawer);$('scrim').addEventListener('click',closeDrawer);
-$('newPost').addEventListener('click',async()=>{await newPost(false);closeDrawer();showTab('Photo');toast('New post started')});
+$('newPost').addEventListener('click',async()=>{await newPost(false);closeDrawer();showTab('Details');toast('New post started')});
 $('dlist').addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(d){delDraft(d.dataset.del);return}const o=e.target.closest('[data-id]');if(o)openDraft(o.dataset.id)});
 addEventListener('pagehide',()=>saveNow());document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow()});
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}
@@ -481,41 +513,36 @@ fb.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setFont(
 const syncSample=()=>{const t=$('time').value.trim()||'1:19:42';fb.querySelectorAll('.ft').forEach(x=>x.textContent=t)};
 $('time').addEventListener('input',syncSample);
 
-// per-element text styles: font, colour, size
+// text tab: pick a line (chip or tap on the post), then edit its font, colour and size
 const COLS=[['','Auto','Layout colour'],['#ffffff','','White'],['#161616','','Black'],['accent','','Accent colour']];
-const ers=$('ers');
-for(const [k,l] of ZK){const r=document.createElement('div');r.className='er';r.dataset.k=k;
-  const h=document.createElement('div');h.className='erh';const b=document.createElement('b');b.textContent=l;
-  const rs=document.createElement('button');rs.type='button';rs.className='mini';rs.dataset.reset=k;rs.textContent='Reset';rs.setAttribute('aria-label','Reset '+l);h.append(b,rs);r.append(h);
-  if(k!=='logo'){const c=document.createElement('div');c.className='erc';
-    const s=document.createElement('select');s.dataset.font=k;s.setAttribute('aria-label',l+' font');
-    s.innerHTML='<option value="">Default font</option>'+Object.entries(FAM).map(([id,f])=>`<option value="${id}">${f.label}</option>`).join('');
-    const cl=document.createElement('div');cl.className='cols';cl.setAttribute('role','group');cl.setAttribute('aria-label',l+' colour');
-    for(const [v,t,a] of COLS){const x=document.createElement('button');x.type='button';x.dataset.col=v;x.dataset.k=k;x.setAttribute('aria-label',a);x.textContent=t;
-      if(!v)x.className='auto';else if(v==='accent')x.className='acs';else x.style.background=v;cl.append(x)}
-    const pk=document.createElement('input');pk.type='color';pk.dataset.pick=k;pk.value='#ff3b30';pk.setAttribute('aria-label',l+' custom colour');cl.append(pk);
-    c.append(s,cl);r.append(c)}
-  const z=document.createElement('div');z.className='sz';
-  const zl=document.createElement('label');zl.htmlFor='z-'+k;zl.textContent='Size';
-  const i=document.createElement('input');i.type='range';i.id='z-'+k;i.min=60;i.max=160;i.step=5;i.dataset.k=k;i.setAttribute('aria-label',l+' size');
-  const o=document.createElement('output');o.id='o-'+k;z.append(zl,i,o);r.append(z);ers.append(r)}
-function paintES(){for(const [k] of ZK){$('z-'+k).value=Math.round(Z[k]*100);$('o-'+k).textContent=Math.round(Z[k]*100)+'%';
-    if(k==='logo')continue;const e=ES[k],r=ers.querySelector(`.er[data-k="${k}"]`);r.querySelector('select').value=e.font;
-    const custom=e.color&&!COLS.some(([v])=>v===e.color);
-    r.querySelectorAll('[data-col]').forEach(x=>x.setAttribute('aria-pressed',!custom&&x.dataset.col===e.color));
-    const pk=r.querySelector('[data-pick]');pk.classList.toggle('on',!!custom);if(custom)pk.value=e.color}
-  ers.querySelectorAll('.acs').forEach(b=>b.style.background=st.accent)}
+const LBL=Object.fromEntries(ZK);
+let selK='name';
+$('chips').innerHTML=ZK.map(([k,l])=>`<button type="button" role="radio" data-sel="${k}">${l}</button>`).join('');
+$('efont').innerHTML='<option value="">Default (post font)</option>'+Object.entries(FAM).map(([id,f])=>`<option value="${id}">${f.label}</option>`).join('');
+$('ecols').innerHTML=COLS.map(([v,t,a])=>`<button type="button" data-col="${v}" aria-label="${a}" class="${!v?'auto':v==='accent'?'acs':''}"${v&&v!=='accent'?` style="background:${v}"`:''}>${t}</button>`).join('')+'<input type="color" id="epick" value="#ff3b30" aria-label="Custom colour">';
+const NOTE={prog:'Add a previous best in Details to show this line.',stats:'Add a place or turn on pace in Details to show this line.',quote:'Add a quote in Details to show this line.',handle:'Add your handle in Style to show this line.',logo:'Add a team logo in Style to show it.',head:'Pick a headline in Details to show this line.'};
+function paintES(){const k=selK,e=ES[k],isLogo=k==='logo';
+  $('chips').querySelectorAll('button').forEach(b=>{const on=b.dataset.sel===k;b.setAttribute('aria-checked',on);if(on)b.scrollIntoView({block:'nearest',inline:'nearest'})});
+  $('erowF').hidden=$('erowC').hidden=isLogo;
+  if(!isLogo){$('efont').value=e.font;const custom=e.color&&!COLS.some(([v])=>v===e.color);
+    $('ecols').querySelectorAll('[data-col]').forEach(x=>x.setAttribute('aria-pressed',!custom&&x.dataset.col===e.color));
+    $('epick').classList.toggle('on',!!custom);if(custom)$('epick').value=e.color}
+  $('ez').value=Math.round(Z[k]*100);$('eo').textContent=Math.round(Z[k]*100)+'%';$('ez').setAttribute('aria-label',LBL[k]+' size');
+  $('ecols').querySelectorAll('.acs').forEach(b=>b.style.background=st.accent);placeSel()}
+function placeSel(){const s=$('sel'),n=$('enote'),b=BX[selK],on=curTab==='Text';
+  n.hidden=!on||!!b;if(on&&!b)n.textContent=NOTE[selK]||'';
+  if(!on||!b){s.hidden=true;return}const k=cv.clientWidth/cv.width,p=12;s.hidden=false;
+  Object.assign(s.style,{left:cv.offsetLeft+(b.x-p)*k+'px',top:cv.offsetTop+(b.y-p)*k+'px',width:(b.w+2*p)*k+'px',height:(b.h+2*p)*k+'px'})}
 const saveES=()=>{store.set('el',JSON.stringify(ES));store.set('sizes',JSON.stringify(Z))};
-ers.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
-  if(t.dataset.reset){const k=t.dataset.reset;Z[k]=1;if(ES[k])ES[k]={font:'',color:''}}
-  else if(t.dataset.col!==undefined)ES[t.dataset.k].color=t.dataset.col;else return;
-  saveES();paintES();req()});
-ers.addEventListener('input',e=>{const t=e.target;
-  if(t.dataset.font!==undefined){ES[t.dataset.font].font=t.value;loadFam(t.value).then(draw)}
-  else if(t.dataset.pick){ES[t.dataset.pick].color=t.value}
-  else if(t.dataset.k){Z[t.dataset.k]=t.value/100}else return;
-  saveES();paintES();req()});
-$('esReset').addEventListener('click',()=>{for(const k in Z)Z[k]=1;for(const k in ES)ES[k]={font:'',color:''};saveES();paintES();req();toast('Text styles reset')});
+const edited=()=>{saveES();paintES();req()};
+$('chips').addEventListener('click',e=>{const b=e.target.closest('[data-sel]');if(b){selK=b.dataset.sel;paintES()}});
+$('efont').addEventListener('input',e=>{ES[selK].font=e.target.value;loadFam(e.target.value).then(draw);edited()});
+$('ecols').addEventListener('click',e=>{const b=e.target.closest('[data-col]');if(b&&ES[selK]){ES[selK].color=b.dataset.col;edited()}});
+$('epick').addEventListener('input',e=>{if(ES[selK]){ES[selK].color=e.target.value;edited()}});
+$('ez').addEventListener('input',e=>{Z[selK]=e.target.value/100;edited()});
+$('eReset').addEventListener('click',()=>{Z[selK]=1;if(ES[selK])ES[selK]={font:'',color:''};edited()});
+$('esReset').addEventListener('click',()=>{for(const k in Z)Z[k]=1;for(const k in ES)ES[k]={font:'',color:''};edited();toast('Text styles reset')});
+addEventListener('resize',()=>placeSel());
 
 // restore remembered style (text fields always start blank)
 for(const k of ['layout','size']){const v=store.get(k);if(v&&(k==='layout'?L[v]:SIZES[v])){st[k]=v;const r=document.querySelector(`input[name=${k}][value=${v}]`);if(r)r.checked=true}}
@@ -526,9 +553,9 @@ for(const id of TEXT){$(id).value='';$(id).dataset.d=''}
 const KEEP=['dist','unit','head'];
 for(const id of KEEP){const v=store.get('f-'+id);if(v!==null)$(id).value=v}
 {const v=store.get('f-pace');if(v!==null)$('pace').checked=v==='1'}
-function syncForm(){$('customWrap').hidden=$('head').value!=='custom';$('kmWrap').hidden=$('dist').value!=='other';$('photoX').hidden=!img&&!photoBlob;
+function syncForm(){$('customWrap').hidden=$('head').value!=='custom';$('kmWrap').hidden=$('dist').value!=='other';$('photoX').hidden=!img&&!photoBlob;$('photoL').textContent=img||photoBlob?'Change photo':'Add photo';
   for(const id of ['time','prev'])$(id).dataset.d=$(id).value.replace(/\D/g,'');syncSample()}
-paintSw();paintES();
+paintSw();
 
 $('f').addEventListener('input',e=>{const t=e.target;
   if(t.name==='layout'||t.name==='size'){st[t.name]=t.value;store.set(t.name,t.value)}
@@ -543,21 +570,38 @@ for(const id of ['time','prev']){const el=$(id);
     if(e.inputType&&e.inputType.startsWith('delete')&&g===el.dataset.d)g=g.slice(0,-1);
     el.dataset.d=g;el.value=fmtDigits(g);req()},true)}
 // photos are drawn from the original and stored (downsized) with the draft
-function usePhoto(file){readImg(file,im=>{img=im;px=py=0;$('zoom').value=1;$('photoX').hidden=false;req();
+function usePhoto(file){readImg(file,im=>{img=im;px=py=0;$('zoom').value=1;syncForm();req();
   const c=document.createElement('canvas'),k=Math.min(1,2560/Math.max(im.width,im.height));c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
   c.getContext('2d').drawImage(im,0,0,c.width,c.height);c.toBlob(b=>{if(img!==im)return;photoBlob=b;photoVer++;queueSave()},'image/jpeg',.9)})}
 $('photo').addEventListener('change',e=>usePhoto(e.target.files[0]));
-$('photoX').addEventListener('click',()=>{img=null;photoBlob=null;photoVer++;px=py=0;$('zoom').value=1;$('photo').value='';$('photoX').hidden=true;req()});
+$('photoX').addEventListener('click',()=>{img=null;photoBlob=null;photoVer++;px=py=0;$('zoom').value=1;$('photo').value='';syncForm();req()});
 $('logoIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>setLogo(r.result,true);r.readAsDataURL(f)});
 $('logoX').addEventListener('click',()=>{logo=null;store.set('logo',null);$('logoPrev').hidden=true;$('logoX').hidden=true;$('logoIn').value='';req()});
-$('next').addEventListener('click',async()=>{await newPost(true);showTab('Athlete');$('name').focus();toast('Saved. Race details kept for the next athlete')});
+$('next').addEventListener('click',async()=>{await newPost(true);showTab('Details');$('f').scrollTop=0;$('name').focus();toast('Saved. Race details kept for the next athlete')});
 
-// drag to reposition
-let drag=null;
-cv.addEventListener('pointerdown',e=>{if(!img)return;drag={x:e.clientX,y:e.clientY,px,py};cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'});
-cv.addEventListener('pointermove',e=>{if(!drag)return;const k=cv.width/cv.clientWidth;px=drag.px+(e.clientX-drag.x)*k;py=drag.py+(e.clientY-drag.y)*k;req()});
-const end=()=>{drag=null;cv.style.cursor=''};cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
-cv.addEventListener('click',()=>{if(!img)$('photo').click()});
+// preview gestures: tap a line to edit it, drag to move the photo, pinch (or ctrl + scroll) to zoom
+const FIELD={time:'time',prog:'prev',name:'name',race:'race',stats:'place',head:'head',quote:'quote',handle:'handle'};
+const pts=new Map();let drag=null,pinch=null,moved=false;
+const setZoom=z=>{$('zoom').value=Math.max(1,Math.min(3,z));req()};
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===1){moved=false;drag=img?{x:e.clientX,y:e.clientY,px,py}:null}
+  else if(pts.size===2&&img){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,z:+$('zoom').value};drag=null;moved=true}});
+cv.addEventListener('pointermove',e=>{const p0=pts.get(e.pointerId);if(!p0)return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pinch&&pts.size===2){const [a,b]=[...pts.values()];setZoom(pinch.z*Math.hypot(a.x-b.x,a.y-b.y)/pinch.d);return}
+  if(drag&&!moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6)moved=true;
+  if(drag&&moved){const k=cv.width/cv.clientWidth;px=drag.px+(e.clientX-drag.x)*k;py=drag.py+(e.clientY-drag.y)*k;cv.style.cursor='grabbing';req()}});
+const lift=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size){drag=null;cv.style.cursor=''}};
+cv.addEventListener('pointerup',lift);cv.addEventListener('pointercancel',e=>{moved=true;lift(e)});
+cv.addEventListener('wheel',e=>{if(!img||!e.ctrlKey)return;e.preventDefault();setZoom(+$('zoom').value*Math.exp(-e.deltaY*.01))},{passive:false});
+function hitAt(e){const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*cv.width/r.width,y=(e.clientY-r.top)*cv.height/r.height,pad=18;let best=null,ba=Infinity;
+  for(const [k,b] of Object.entries(BX))if(x>=b.x-pad&&x<=b.x+b.w+pad&&y>=b.y-pad&&y<=b.y+b.h+pad&&b.w*b.h<ba){best=k;ba=b.w*b.h}return best}
+cv.addEventListener('click',e=>{if(moved)return;const k=hitAt(e);
+  if(!k){if(!img)$('photo').click();return}
+  selK=k;paintES();if(curTab==='Text')return;
+  if(k==='logo'){showTab('Style');$('logoIn').focus();return}
+  let id=FIELD[k];if(k==='head'&&$('head').value==='custom')id='custom';
+  showTab(k==='handle'?'Style':'Details');const el=$(id);
+  el.scrollIntoView({block:'center'});el.focus({preventScroll:true});el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')});
 // drop a photo on the preview (desktop)
 for(const ev of ['dragenter','dragover'])cv.addEventListener(ev,e=>{e.preventDefault();cv.classList.add('drop')});
 for(const ev of ['dragleave','drop'])cv.addEventListener(ev,()=>cv.classList.remove('drop'));
@@ -568,15 +612,15 @@ const tabs=$('tabs'),panels=[...document.querySelectorAll('fieldset[data-tab]')]
 panels.forEach((f,i)=>{const n=f.dataset.tab,b=document.createElement('button');b.type='button';b.id='tab-'+i;b.textContent=n;b.dataset.t=n;b.setAttribute('role','tab');b.setAttribute('aria-controls','panel-'+i);
   f.id='panel-'+i;f.setAttribute('role','tabpanel');f.setAttribute('aria-labelledby',b.id);tabs.append(b)});
 const tabBtns=[...tabs.children];
-function showTab(n){if(!panels.some(f=>f.dataset.tab===n))n=panels[0].dataset.tab;
+function showTab(n){if(!panels.some(f=>f.dataset.tab===n))n=panels[0].dataset.tab;curTab=n;
   panels.forEach(f=>f.hidden=f.dataset.tab!==n);
   tabBtns.forEach(b=>{const on=b.dataset.t===n;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;if(on)b.scrollIntoView({block:'nearest',inline:'nearest'})});
-  $('f').scrollTop=0;store.set('tab',n)}
+  $('f').scrollTop=0;store.set('tab',n);placeSel()}
 tabs.addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.t)});
 tabs.addEventListener('keydown',e=>{const i=tabBtns.indexOf(document.activeElement);if(i<0)return;let j=null;
   if(e.key==='ArrowRight')j=(i+1)%tabBtns.length;else if(e.key==='ArrowLeft')j=(i-1+tabBtns.length)%tabBtns.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=tabBtns.length-1;
   if(j===null)return;e.preventDefault();showTab(tabBtns[j].dataset.t);tabBtns[j].focus()});
-showTab(store.get('tab')||'Photo');
+showTab(store.get('tab')||'Details');paintES();
 // phone: size the app to the visible area so the keyboard shrinks the preview instead of pushing it off screen
 const vv=window.visualViewport,narrow=matchMedia('(max-width:899px)');
 function fitVV(){const r=document.documentElement.style;if(vv&&narrow.matches){r.setProperty('--vvh',vv.height+'px');r.setProperty('--vvt',vv.offsetTop+'px')}else{r.removeProperty('--vvh');r.removeProperty('--vvt')}}
@@ -587,7 +631,7 @@ $('f').addEventListener('focusin',e=>{if(narrow.matches&&e.target.matches('input
 // save
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const touch=matchMedia('(pointer:coarse)').matches;
-$('save').textContent=touch&&navigator.canShare?'Save or share':'Save image';
+$('save').textContent=touch?'Save':'Save image';
 $('save').addEventListener('click',async()=>{if(raf){cancelAnimationFrame(raf);draw()}saveNow();const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.93));if(!blob){toast('Could not create the image');return}
   const d=data(),fn=`${slug(d.name)||'athlete'}-${slug(d.race)||'race'}.jpg`,file=new File([blob],fn,{type:'image/jpeg'});
   // phone: the share sheet offers Save Image and Instagram directly
