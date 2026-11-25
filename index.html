@@ -130,10 +130,12 @@ textarea{min-height:64px}
 .fg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
 .fg .full{grid-column:1/-1}
 .tip{margin:0;color:var(--mut);font-size:13px}
-.prow{display:flex;align-items:center;gap:10px}
-.prow .file span,.prow button{min-height:40px;padding:6px 16px;font-size:15px;white-space:nowrap}
-.prow .zl{display:flex;flex:1;align-items:center;gap:8px;font-size:13px}
-.prow input[type=range]{flex:1;height:40px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.vh:focus-visible{width:auto;height:auto;opacity:1;pointer-events:auto;left:8px;top:8px;z-index:3}
+.pmenu{position:absolute;z-index:4;display:grid;min-width:180px;padding:6px;border-radius:12px;background:var(--bg);box-shadow:0 10px 30px rgba(0,0,0,.3);border:1px solid var(--line)}
+.pmenu button{border:0;border-radius:8px;background:none;text-align:left;min-height:44px;padding:8px 14px;font-size:16px}
+.pmenu button:hover,.pmenu button:focus-visible{background:var(--pan);outline:0}
+.pmenu [data-pa=remove]{color:var(--red)}
 .chk{min-height:40px;font-size:15px;color:var(--ink)}
 .wide{width:100%}
 .lbl{font-size:13px;color:var(--mut);margin-bottom:5px}
@@ -179,6 +181,13 @@ fieldset{border:0;background:none;padding:2px 0 0;gap:12px}
 <section class="stage" aria-label="Preview">
 <canvas id="cv" width="1080" height="1350" aria-label="Post preview. Tap a line to edit it; drag or pinch to adjust the photo."></canvas>
 <div id="sel" hidden></div>
+<input type="file" id="photo" accept="image/*" class="vh" tabindex="-1" aria-hidden="true"><input type="hidden" id="zoom" value="1">
+<div id="pmenu" class="pmenu" role="menu" aria-label="Photo" hidden>
+<button type="button" role="menuitem" data-pa="change">Change photo</button>
+<button type="button" role="menuitem" data-pa="reset">Reset framing</button>
+<button type="button" role="menuitem" data-pa="remove">Remove photo</button>
+</div>
+<button type="button" id="addPhoto" class="vh">Add photo</button>
 </section>
 <div class="bar">
 <button type="button" id="menu" class="icon" aria-label="Drafts" aria-controls="drawer" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -188,9 +197,7 @@ fieldset{border:0;background:none;padding:2px 0 0;gap:12px}
 
 <form id="f" autocomplete="off" onsubmit="return false">
 <fieldset data-tab="Details"><legend>Details</legend>
-<p class="tip">Tap any line on the post to edit it. Drag or pinch the photo to frame it.</p>
-<div class="prow"><label class="file"><input type="file" id="photo" accept="image/*"><span id="photoL">Add photo</span></label><button type="button" id="photoX" hidden>Remove</button>
-<label class="zl" for="zoom">Zoom<input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></label></div>
+<p class="tip">Tap a line on the post to edit it. Tap the photo to add or change it; pinch to zoom and drag to frame.</p>
 <div class="fg">
 <label class="full">Athlete name<input id="name" placeholder="Athlete name"></label>
 <label>Finish time<input id="time" placeholder="1:19:42" inputmode="numeric"></label>
@@ -335,7 +342,7 @@ function photo(x,y,w,h){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
   if(img){const s=Math.max(w/img.width,h/img.height)*+$('zoom').value,dw=img.width*s,dh=img.height*s,mx=(dw-w)/2,my=(dh-h)/2;
     px=Math.max(-mx,Math.min(mx,px));py=Math.max(-my,Math.min(my,py));ctx.drawImage(img,x+(w-dw)/2+px,y+(h-dh)/2+py,dw,dh)}
   else{const g=ctx.createLinearGradient(x,y,x,y+h);g.addColorStop(0,'#a9a59d');g.addColorStop(1,'#6f6b64');ctx.fillStyle=g;ctx.fillRect(x,y,w,h);
-    F(500,30);ctx.fillStyle='rgba(255,255,255,.85)';ctx.textAlign='center';ctx.fillText('Add a photo of your athlete',x+w/2,y+h*.38);ctx.textAlign='left'}
+    F(500,30);ctx.fillStyle='rgba(255,255,255,.85)';ctx.textAlign='center';ctx.fillText('Tap to add a photo',x+w/2,y+h*.38);ctx.textAlign='left'}
   ctx.restore()}
 function drawLogo(x,y,s,right){if(!logo)return;const k=Math.min(s/logo.width,s/logo.height),w=logo.width*k,h=logo.height*k;ctx.drawImage(logo,right?x-w:x,y,w,h);mark('logo',right?x-w:x,y,w,h)}
 const stats=d=>[d.place,d.pace].filter(Boolean);
@@ -553,7 +560,7 @@ for(const id of TEXT){$(id).value='';$(id).dataset.d=''}
 const KEEP=['dist','unit','head'];
 for(const id of KEEP){const v=store.get('f-'+id);if(v!==null)$(id).value=v}
 {const v=store.get('f-pace');if(v!==null)$('pace').checked=v==='1'}
-function syncForm(){$('customWrap').hidden=$('head').value!=='custom';$('kmWrap').hidden=$('dist').value!=='other';$('photoX').hidden=!img&&!photoBlob;$('photoL').textContent=img||photoBlob?'Change photo':'Add photo';
+function syncForm(){$('customWrap').hidden=$('head').value!=='custom';$('kmWrap').hidden=$('dist').value!=='other';
   for(const id of ['time','prev'])$(id).dataset.d=$(id).value.replace(/\D/g,'');syncSample()}
 paintSw();
 
@@ -574,7 +581,22 @@ function usePhoto(file){readImg(file,im=>{img=im;px=py=0;$('zoom').value=1;syncF
   const c=document.createElement('canvas'),k=Math.min(1,2560/Math.max(im.width,im.height));c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
   c.getContext('2d').drawImage(im,0,0,c.width,c.height);c.toBlob(b=>{if(img!==im)return;photoBlob=b;photoVer++;queueSave()},'image/jpeg',.9)})}
 $('photo').addEventListener('change',e=>usePhoto(e.target.files[0]));
-$('photoX').addEventListener('click',()=>{img=null;photoBlob=null;photoVer++;px=py=0;$('zoom').value=1;$('photo').value='';syncForm();req()});
+// photo menu: tap the photo (not a text line) to change, reset or remove it
+const pm=$('pmenu');
+function openPM(e){const st=cv.parentElement.getBoundingClientRect();pm.hidden=false;
+  // open at the tap, kept inside the photo
+  const l=cv.offsetLeft+8,r=cv.offsetLeft+cv.clientWidth-pm.offsetWidth-8,t=cv.offsetTop+8,b=cv.offsetTop+cv.clientHeight-pm.offsetHeight-8;
+  const x=Math.max(l,Math.min(r,e.clientX-st.left-pm.offsetWidth/2)),y=Math.max(t,Math.min(b,e.clientY-st.top-20));
+  pm.style.left=x+'px';pm.style.top=y+'px';pm.querySelector('button').focus({preventScroll:true})}
+const closePM=()=>{pm.hidden=true};
+pm.addEventListener('click',e=>{const a=e.target.closest('[data-pa]');if(!a)return;closePM();const k=a.dataset.pa;
+  if(k==='change')$('photo').click();
+  else if(k==='reset'){px=py=0;$('zoom').value=1;req()}
+  else if(k==='remove'){img=null;photoBlob=null;photoVer++;px=py=0;$('zoom').value=1;$('photo').value='';req();toast('Photo removed')}});
+document.addEventListener('pointerdown',e=>{if(!pm.hidden&&!pm.contains(e.target))closePM()},true);
+pm.addEventListener('keydown',e=>{const b=[...pm.querySelectorAll('button')],i=b.indexOf(document.activeElement);
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();b[(i+(e.key==='ArrowDown'?1:-1)+b.length)%b.length].focus()}});
+$('addPhoto').addEventListener('click',()=>$('photo').click());
 $('logoIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>setLogo(r.result,true);r.readAsDataURL(f)});
 $('logoX').addEventListener('click',()=>{logo=null;store.set('logo',null);$('logoPrev').hidden=true;$('logoX').hidden=true;$('logoIn').value='';req()});
 $('next').addEventListener('click',async()=>{await newPost(true);showTab('Details');$('f').scrollTop=0;$('name').focus();toast('Saved. Race details kept for the next athlete')});
@@ -583,7 +605,7 @@ $('next').addEventListener('click',async()=>{await newPost(true);showTab('Detail
 const FIELD={time:'time',prog:'prev',name:'name',race:'race',stats:'place',head:'head',quote:'quote',handle:'handle'};
 const pts=new Map();let drag=null,pinch=null,moved=false;
 const setZoom=z=>{$('zoom').value=Math.max(1,Math.min(3,z));req()};
-cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+cv.addEventListener('pointerdown',e=>{if(e.isPrimary){pts.clear();pinch=null}cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(pts.size===1){moved=false;drag=img?{x:e.clientX,y:e.clientY,px,py}:null}
   else if(pts.size===2&&img){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,z:+$('zoom').value};drag=null;moved=true}});
 cv.addEventListener('pointermove',e=>{const p0=pts.get(e.pointerId);if(!p0)return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
@@ -591,12 +613,12 @@ cv.addEventListener('pointermove',e=>{const p0=pts.get(e.pointerId);if(!p0)retur
   if(drag&&!moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6)moved=true;
   if(drag&&moved){const k=cv.width/cv.clientWidth;px=drag.px+(e.clientX-drag.x)*k;py=drag.py+(e.clientY-drag.y)*k;cv.style.cursor='grabbing';req()}});
 const lift=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size){drag=null;cv.style.cursor=''}};
-cv.addEventListener('pointerup',lift);cv.addEventListener('pointercancel',e=>{moved=true;lift(e)});
+cv.addEventListener('pointerup',lift);cv.addEventListener('lostpointercapture',e=>{if(pts.has(e.pointerId))lift(e)});cv.addEventListener('pointercancel',e=>{moved=true;lift(e)});
 cv.addEventListener('wheel',e=>{if(!img||!e.ctrlKey)return;e.preventDefault();setZoom(+$('zoom').value*Math.exp(-e.deltaY*.01))},{passive:false});
 function hitAt(e){const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*cv.width/r.width,y=(e.clientY-r.top)*cv.height/r.height,pad=18;let best=null,ba=Infinity;
   for(const [k,b] of Object.entries(BX))if(x>=b.x-pad&&x<=b.x+b.w+pad&&y>=b.y-pad&&y<=b.y+b.h+pad&&b.w*b.h<ba){best=k;ba=b.w*b.h}return best}
 cv.addEventListener('click',e=>{if(moved)return;const k=hitAt(e);
-  if(!k){if(!img)$('photo').click();return}
+  if(!k){if(img)openPM(e);else $('photo').click();return}
   selK=k;paintES();if(curTab==='Text')return;
   if(k==='logo'){showTab('Style');$('logoIn').focus();return}
   let id=FIELD[k];if(k==='head'&&$('head').value==='custom')id='custom';
@@ -641,7 +663,7 @@ $('save').addEventListener('click',async()=>{if(raf){cancelAnimationFrame(raf);d
   $('ovImg').src=URL.createObjectURL(blob);$('ov').classList.add('on');$('ovX').focus()});
 $('ovX').addEventListener('click',()=>$('ov').classList.remove('on'));
 $('ov').addEventListener('click',e=>{if(e.target.id==='ov')$('ov').classList.remove('on')});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('ov').classList.remove('on');closeDrawer()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('ov').classList.remove('on');closeDrawer();if(!pm.hidden){closePM();cv.focus()}}});
 
 setFont(store.get('font')||'clean');syncForm();loadUsed();
 lastSnap=JSON.stringify(snap());draw();
